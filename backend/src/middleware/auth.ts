@@ -6,31 +6,71 @@ interface AuthRequest extends Request {
   user?: any;
 }
 
-export const protect = async (req: AuthRequest, res: Response, next: NextFunction) => {
+export const protect = async (req: Request, res: Response, next: NextFunction) => {
   let token;
 
-  if ((req as any).headers.authorization && (req as any).headers.authorization.startsWith('Bearer')) {
-    token = (req as any).headers.authorization.split(' ')[1];
+  // Check for token in Authorization header
+  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+    token = req.headers.authorization.split(' ')[1];
   }
 
   if (!token) {
-    return res.status(401).json({ success: false, error: 'Not authorized to access this route' });
+    return res.status(401).json({ 
+      success: false, 
+      error: 'Access denied. No token provided.' 
+    });
   }
 
   try {
+    // Verify token
     const decoded: any = jwt.verify(token, process.env.JWT_SECRET!);
-    req.user = await User.findById(decoded.id);
+    
+    // Get user from token
+    const user = await User.findById(decoded.id);
+    if (!user) {
+      return res.status(401).json({ 
+        success: false, 
+        error: 'Token is no longer valid.' 
+      });
+    }
+
+    // Check if user is verified
+    if (!user.isVerified) {
+      return res.status(401).json({ 
+        success: false, 
+        error: 'Please verify your account first.' 
+      });
+    }
+
+    (req as any).user = user;
     next();
   } catch (error) {
-    return res.status(401).json({ success: false, error: 'Not authorized to access this route' });
+    console.error('Auth error:', error);
+    return res.status(401).json({ 
+      success: false, 
+      error: 'Invalid token.' 
+    });
   }
 };
 
 export const authorize = (...roles: string[]) => {
-  return (req: AuthRequest, res: Response, next: NextFunction) => {
-    if (!roles.includes(req.user.role)) {
-      return res.status(403).json({ success: false, error: 'User role not authorized to access this route' });
+  return (req: Request, res: Response, next: NextFunction) => {
+    const user = (req as any).user;
+    
+    if (!user) {
+      return res.status(401).json({ 
+        success: false, 
+        error: 'Access denied. User not authenticated.' 
+      });
     }
+
+    if (!roles.includes(user.role)) {
+      return res.status(403).json({ 
+        success: false, 
+        error: `Access denied. Required role: ${roles.join(' or ')}. Your role: ${user.role}` 
+      });
+    }
+    
     next();
   };
 };

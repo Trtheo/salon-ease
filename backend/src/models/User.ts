@@ -11,7 +11,7 @@ const userSchema = new Schema<IUserDocument>({
   userId: { type: String, unique: true, default: generateUserId },
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
+  password: { type: String, required: true, select: false },
   phone: { type: String },
   role: { type: String, enum: ['customer', 'salon_owner', 'admin'], default: 'customer' },
   avatar: { type: String },

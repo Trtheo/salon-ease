@@ -5,6 +5,7 @@ export const validateRegister = [
   body('name').notEmpty().withMessage('Name is required'),
   body('email').isEmail().withMessage('Please provide a valid email'),
   body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
+  body('phone').notEmpty().withMessage('Phone number is required'),
   body('role').isIn(['customer', 'salon_owner']).withMessage('Invalid role')
 ];
 

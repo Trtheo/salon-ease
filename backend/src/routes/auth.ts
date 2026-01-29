@@ -1,5 +1,5 @@
 import express from 'express';
-import { register, login, getMe } from '../controllers/auth';
+import { register, verifyRegistration, login, getMe, forgotPassword, resetPassword, getTestOTP } from '../controllers/auth';
 import { protect } from '../middleware/auth';
 import { validateRegister, validateLogin, handleValidationErrors } from '../middleware/validation';
 
@@ -50,7 +50,7 @@ const router = express.Router();
  * @swagger
  * /api/auth/register:
  *   post:
- *     summary: Register a new user
+ *     summary: Register a new user (sends OTP to both email and SMS)
  *     tags: [Authentication]
  *     requestBody:
  *       required: true
@@ -59,6 +59,34 @@ const router = express.Router();
  *           schema:
  *             $ref: '#/components/schemas/User'
  *     responses:
+ *       200:
+ *         description: OTP sent to both email and SMS for verification
+ *       400:
+ *         description: Validation error or user already exists
+ */
+router.post('/register', validateRegister, handleValidationErrors, register);
+
+/**
+ * @swagger
+ * /api/auth/verify-registration:
+ *   post:
+ *     summary: Verify OTP and complete registration
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             allOf:
+ *               - $ref: '#/components/schemas/User'
+ *               - type: object
+ *                 required:
+ *                   - code
+ *                 properties:
+ *                   code:
+ *                     type: string
+ *                     description: OTP code
+ *     responses:
  *       201:
  *         description: User registered successfully
  *         content:
@@ -66,9 +94,9 @@ const router = express.Router();
  *             schema:
  *               $ref: '#/components/schemas/AuthResponse'
  *       400:
- *         description: Validation error or user already exists
+ *         description: Invalid OTP or registration data
  */
-router.post('/register', validateRegister, handleValidationErrors, register);
+router.post('/verify-registration', verifyRegistration);
 
 /**
  * @swagger
@@ -105,6 +133,78 @@ router.post('/login', validateLogin, handleValidationErrors, login);
 
 /**
  * @swagger
+ * /api/auth/forgot-password:
+ *   post:
+ *     summary: Send OTP for password reset (choose email or SMS)
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - method
+ *             properties:
+ *               method:
+ *                 type: string
+ *                 enum: [email, phone]
+ *                 description: Choose delivery method
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: Required if method is email
+ *               phone:
+ *                 type: string
+ *                 description: Required if method is phone
+ *     responses:
+ *       200:
+ *         description: OTP sent for password reset
+ *       404:
+ *         description: User not found
+ */
+router.post('/forgot-password', forgotPassword);
+
+/**
+ * @swagger
+ * /api/auth/reset-password:
+ *   post:
+ *     summary: Reset password with OTP
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - code
+ *               - newPassword
+ *               - method
+ *             properties:
+ *               method:
+ *                 type: string
+ *                 enum: [email, phone]
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               phone:
+ *                 type: string
+ *               code:
+ *                 type: string
+ *               newPassword:
+ *                 type: string
+ *                 minLength: 6
+ *     responses:
+ *       200:
+ *         description: Password reset successfully
+ *       400:
+ *         description: Invalid OTP
+ */
+router.post('/reset-password', resetPassword);
+
+/**
+ * @swagger
  * /api/auth/me:
  *   get:
  *     summary: Get current user profile
@@ -129,3 +229,25 @@ router.post('/login', validateLogin, handleValidationErrors, login);
 router.get('/me', protect, getMe);
 
 export default router;
+/**
+ * @swagger
+ * /api/auth/test-otp:
+ *   get:
+ *     summary: Get OTP for testing (Development only)
+ *     tags: [Authentication]
+ *     parameters:
+ *       - in: query
+ *         name: phone
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: email
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: OTP code retrieved
+ *       403:
+ *         description: Only available in development
+ */
+router.get('/test-otp', getTestOTP);
