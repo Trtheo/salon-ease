@@ -27,6 +27,19 @@ export const sendMessage = async (req: AuthRequest, res: Response) => {
       messageData.content = 'Voice message';
     }
 
+    // Handle image/video message
+    if ((messageType === 'image' || messageType === 'video') && (req as any).file) {
+      const file = (req as any).file;
+      messageData.mediaData = {
+        filename: file.filename,
+        originalName: file.originalname,
+        size: file.size,
+        mimeType: file.mimetype,
+        duration: req.body.duration ? parseInt(req.body.duration) : undefined
+      };
+      messageData.content = messageType === 'image' ? 'Image' : 'Video';
+    }
+
     const message = await Message.create(messageData);
 
     // Update or create conversation
@@ -146,6 +159,57 @@ export const markAsRead = async (req: AuthRequest, res: Response) => {
       success: true,
       message: 'Messages marked as read'
     });
+  } catch (error: any) {
+    res.status(400).json({
+      success: false,
+      error: error.message
+    });
+  }
+};
+
+// Get media file
+export const getMediaFile = async (req: AuthRequest, res: Response) => {
+  try {
+    const { messageId } = req.params;
+    const userId = req.user!._id;
+
+    // Find message and verify user has access
+    const message = await Message.findOne({
+      _id: messageId,
+      $or: [{ sender: userId }, { receiver: userId }]
+    });
+
+    if (!message) {
+      return res.status(404).json({
+        success: false,
+        error: 'Message not found or access denied'
+      });
+    }
+
+    if (!message.mediaData) {
+      return res.status(404).json({
+        success: false,
+        error: 'No media file found'
+      });
+    }
+
+    const filePath = `uploads/messages/media/${message.mediaData.filename}`;
+    
+    // Check if file exists
+    const fs = require('fs');
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({
+        success: false,
+        error: 'Media file not found'
+      });
+    }
+
+    // Set appropriate headers
+    res.setHeader('Content-Type', message.mediaData.mimeType);
+    res.setHeader('Content-Disposition', `inline; filename="${message.mediaData.originalName}"`);
+    
+    // Send file
+    res.sendFile(require('path').resolve(filePath));
   } catch (error: any) {
     res.status(400).json({
       success: false,

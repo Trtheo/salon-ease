@@ -3,7 +3,7 @@ import path from 'path';
 import fs from 'fs';
 
 // Ensure voice uploads directory exists
-const voiceDir = 'uploads/voice';
+const voiceDir = 'uploads/messages/voice';
 if (!fs.existsSync(voiceDir)) {
   fs.mkdirSync(voiceDir, { recursive: true });
 }

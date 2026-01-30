@@ -49,6 +49,9 @@ app.use(express.urlencoded({ extended: true }));
 
 // Serve static files
 app.use('/uploads', express.static('uploads'));
+app.use('/uploads/avatars', express.static('uploads/avatars'));
+app.use('/uploads/salons', express.static('uploads/salons'));
+app.use('/uploads/messages', express.static('uploads/messages'));
 
 // Swagger Documentation
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));

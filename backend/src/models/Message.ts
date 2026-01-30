@@ -4,11 +4,18 @@ export interface IMessage extends Document {
   sender: mongoose.Types.ObjectId;
   receiver: mongoose.Types.ObjectId;
   content: string;
-  messageType: 'text' | 'voice' | 'image';
+  messageType: 'text' | 'voice' | 'image' | 'video';
   voiceData?: {
     filename: string;
     duration?: number;
     size: number;
+  };
+  mediaData?: {
+    filename: string;
+    originalName: string;
+    size: number;
+    mimeType: string;
+    duration?: number; // for videos
   };
   isRead: boolean;
   readAt?: Date;
@@ -33,13 +40,20 @@ const messageSchema = new Schema<IMessage>({
   },
   messageType: {
     type: String,
-    enum: ['text', 'voice', 'image'],
+    enum: ['text', 'voice', 'image', 'video'],
     default: 'text'
   },
   voiceData: {
     filename: String,
     duration: Number,
     size: Number
+  },
+  mediaData: {
+    filename: String,
+    originalName: String,
+    size: Number,
+    mimeType: String,
+    duration: Number
   },
   isRead: {
     type: Boolean,

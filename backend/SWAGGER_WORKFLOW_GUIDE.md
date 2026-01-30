@@ -1,10 +1,10 @@
 # SalonEase API - Workflow-Ordered Swagger Documentation
 
-## 📋 User Workflow Organization
+##  User Workflow Organization
 
 The Swagger documentation is now organized to follow the logical user workflow for each role:
 
-### 🧑‍💼 **CUSTOMER WORKFLOW** (Tags 1-9)
+###  **CUSTOMER WORKFLOW** (Tags 1-9)
 
 #### 1. Customer - Authentication
 - `POST /auth/register` - Register new customer
@@ -86,7 +86,7 @@ The Swagger documentation is now organized to follow the logical user workflow f
 
 ---
 
-### 💇‍♀️ **SALON OWNER WORKFLOW** (Tags 10-17)
+###  **SALON OWNER WORKFLOW** (Tags 10-17)
 
 #### 10. Salon Owner - Authentication
 - Same authentication endpoints as customers but with `role: "salon_owner"`
@@ -130,7 +130,7 @@ The Swagger documentation is now organized to follow the logical user workflow f
 
 ---
 
-### 👨‍💼 **ADMIN WORKFLOW** (Tags 18-21)
+###  **ADMIN WORKFLOW** (Tags 18-21)
 
 #### 18. Admin - Authentication
 - Same authentication endpoints with `role: "admin"`
@@ -150,7 +150,7 @@ The Swagger documentation is now organized to follow the logical user workflow f
 
 ---
 
-### 🔧 **SHARED UTILITIES** (Tags 22-23)
+###  **SHARED UTILITIES** (Tags 22-23)
 
 #### 22. OTP Services
 - `POST /otp/send` - Send OTP
@@ -164,7 +164,7 @@ The Swagger documentation is now organized to follow the logical user workflow f
 
 ---
 
-## 🚀 Benefits of Workflow Organization
+##  Benefits of Workflow Organization
 
 1. **Logical Flow**: Endpoints are grouped by user journey steps
 2. **Role-Based**: Clear separation between customer, salon owner, and admin workflows
@@ -172,7 +172,7 @@ The Swagger documentation is now organized to follow the logical user workflow f
 4. **Quick Navigation**: Easy to find endpoints based on user workflow stage
 5. **Better UX**: Developers can follow the same flow as end users
 
-## 📖 Access Documentation
+##  Access Documentation
 
 Visit `http://localhost:3002/api-docs` to see the workflow-organized Swagger documentation.
 

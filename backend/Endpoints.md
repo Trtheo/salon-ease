@@ -314,9 +314,23 @@ Authorization: Bearer <jwt-token>
 }
 ```
 
+#### `POST /messages/media`
+**Purpose:** Send image or video message
+**Example Request:** `multipart/form-data` with media file
+**Form Data:**
+- `receiverId`: "user_id"
+- `media`: image/video file
+- `messageType`: "image" or "video"
+- `duration`: video duration (for videos)
+**Example Response:** `{ "success": true, "data": {...} }`
+
+#### `GET /messages/media/:messageId`
+**Purpose:** Get image or video file
+**Example Response:** Binary file data (image/video)
+
 #### `GET /messages/:conversationId`
 **Purpose:** View conversation messages
-**Example Response:** `{ "success": true, "messages": [{"sender": "...", "content": "..."}] }`
+**Example Response:** `{ "success": true, "messages": [{"sender": "...", "content": "...", "messageType": "text|voice|image|video"}] }`
 
 #### `POST /messages/:conversationId`
 **Purpose:** Send message in conversation

@@ -77,7 +77,7 @@ export const getVoiceMessage = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    const filePath = path.join('uploads/voice', message.voiceData.filename);
+    const filePath = path.join('uploads/messages/voice', message.voiceData.filename);
     
     if (!fs.existsSync(filePath)) {
       return res.status(404).json({

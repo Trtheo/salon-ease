@@ -59,7 +59,7 @@ router.post('/avatar', protect, uploadAvatar, (req: any, res) => {
       success: true,
       data: {
         filename: req.file.filename,
-        path: `/uploads/${req.file.filename}`,
+        path: `/uploads/avatars/${req.file.filename}`,
         size: req.file.size
       }
     });
@@ -130,7 +130,7 @@ router.post('/salon-images', protect, authorize('salon_owner', 'admin'), uploadS
 
     const uploadedFiles = req.files.map((file: any) => ({
       filename: file.filename,
-      path: `/uploads/${file.filename}`,
+      path: `/uploads/salons/${file.filename}`,
       size: file.size
     }));
 
