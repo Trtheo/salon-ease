@@ -19,6 +19,15 @@ import appointmentRoutes from './routes/appointments';
 import adminRoutes from './routes/admin';
 import salonOwnerRoutes from './routes/salonOwner';
 import uploadRoutes from './routes/upload';
+import messageRoutes from './routes/messages';
+import reviewRoutes from './routes/reviews';
+import notificationRoutes from './routes/notifications';
+import advancedSearchRoutes from './routes/advancedSearch';
+import socialRoutes from './routes/social';
+import videoCallRoutes from './routes/videoCalls';
+import advancedBookingRoutes from './routes/advancedBooking';
+import portfolioStaffRoutes from './routes/portfolioStaff';
+import analyticsRoutes from './routes/analytics';
 
 dotenv.config();
 
@@ -58,6 +67,15 @@ app.use('/api/appointments', appointmentRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/salon-owner', salonOwnerRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/messages', messageRoutes);
+app.use('/api/reviews', reviewRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/search', advancedSearchRoutes);
+app.use('/api/social', socialRoutes);
+app.use('/api/video-calls', videoCallRoutes);
+app.use('/api/advanced-booking', advancedBookingRoutes);
+app.use('/api', portfolioStaffRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 // Health check
 app.get('/health', (req: express.Request, res: express.Response) => {

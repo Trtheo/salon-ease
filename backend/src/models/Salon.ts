@@ -22,6 +22,7 @@ const salonSchema = new Schema<ISalonDocument>({
   services: [{ type: Schema.Types.ObjectId, ref: 'Service' }],
   owner: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   rating: { type: Number, default: 0 },
+  reviewCount: { type: Number, default: 0 },
   isVerified: { type: Boolean, default: false },
   status: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' }
 }, { timestamps: true });
