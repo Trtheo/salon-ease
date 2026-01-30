@@ -19,11 +19,18 @@ export const getProfile = async (req: any, res: Response) => {
 
 export const updateProfile = async (req: any, res: Response) => {
   try {
-    const fieldsToUpdate = {
-      name: req.body.name,
-      phone: req.body.phone,
-      avatar: req.body.avatar
-    };
+    const fieldsToUpdate: any = {};
+
+    // Only update fields that are provided
+    if (req.body.name !== undefined) fieldsToUpdate.name = req.body.name;
+    if (req.body.phone !== undefined) fieldsToUpdate.phone = req.body.phone;
+
+    // Handle avatar upload
+    if ((req as any).file) {
+      fieldsToUpdate.avatar = `/uploads/avatars/${(req as any).file.filename}`;
+    } else if (req.body.avatar !== undefined) {
+      fieldsToUpdate.avatar = req.body.avatar;
+    }
 
     const user = await User.findByIdAndUpdate(req.user.id, fieldsToUpdate, {
       new: true,

@@ -1,5 +1,5 @@
 import express from 'express';
-import { register, verifyRegistration, login, getMe, forgotPassword, resetPassword, getTestOTP } from '../controllers/auth';
+import { register, verifyRegistration, login, logout, getMe, forgotPassword, resetPassword, getTestOTP } from '../controllers/auth';
 import { protect } from '../middleware/auth';
 import { validateRegister, validateLogin, handleValidationErrors } from '../middleware/validation';
 
@@ -130,6 +130,44 @@ router.post('/verify-registration', verifyRegistration);
  *         description: Invalid credentials
  */
 router.post('/login', validateLogin, handleValidationErrors, login);
+
+/**
+ * @swagger
+ * /api/auth/logout:
+ *   post:
+ *     summary: Logout user
+ *     tags: [1. Customer - Authentication]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Logged out successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Logged out successfully"
+ *       401:
+ *         description: Unauthorized - No token provided
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 error:
+ *                   type: string
+ *                   example: "Access denied. No token provided."
+ */
+router.post('/logout', protect, logout);
 
 /**
  * @swagger

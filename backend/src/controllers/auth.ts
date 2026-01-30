@@ -325,6 +325,22 @@ export const login = async (req: Request, res: Response) => {
   }
 };
 
+export const logout = async (req: any, res: Response) => {
+  try {
+    // Since we're using stateless JWT, we just send a success response
+    // Client should remove the token from storage
+    res.status(200).json({
+      success: true,
+      message: 'Logged out successfully'
+    });
+  } catch (error: any) {
+    res.status(400).json({
+      success: false,
+      error: error.message
+    });
+  }
+};
+
 export const getMe = async (req: any, res: Response) => {
   try {
     const user = await User.findById(req.user.id);

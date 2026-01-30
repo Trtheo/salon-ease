@@ -78,14 +78,9 @@ export const sendOTPEmail = async (email: string, code: string): Promise<boolean
               <h2 style="color: #2d3748; margin: 0 0 8px 0; font-size: 16px; font-weight: 500;">Your verification code</h2>
               <p style="color: #718096; margin: 0 0 24px 0; font-size: 14px;">Please enter this code to complete your account setup:</p>
               
-              <!-- OTP Code with Copy -->
+              <!-- OTP Code -->
               <div style="background: #f7fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 20px; margin: 0 0 24px 0;">
-                <div style="display: flex; align-items: center; justify-content: center; gap: 12px;">
-                  <span style="font-size: 24px; font-weight: 600; color: #2d3748; letter-spacing: 3px; font-family: 'Courier New', monospace;">${code}</span>
-                  <button onclick="copyOTP()" style="background: #4a5568; border: none; border-radius: 4px; padding: 6px 10px; cursor: pointer; color: white; font-size: 11px;" title="Copy to clipboard">
-                    Copy
-                  </button>
-                </div>
+                <span style="font-size: 24px; font-weight: 600; color: #2d3748; letter-spacing: 3px; font-family: 'Courier New', monospace;">${code}</span>
               </div>
               
               <!-- Info -->
@@ -101,23 +96,6 @@ export const sendOTPEmail = async (email: string, code: string): Promise<boolean
               <p style="color: #718096; font-size: 11px; margin: 0; text-align: center;">SalonEase Team</p>
             </div>
           </div>
-          
-          <script>
-            function copyOTP() {
-              const otpText = '${code}';
-              if (navigator.clipboard) {
-                navigator.clipboard.writeText(otpText).then(() => {
-                  const btn = event.target;
-                  btn.innerHTML = 'Copied';
-                  btn.style.background = '#38a169';
-                  setTimeout(() => {
-                    btn.innerHTML = 'Copy';
-                    btn.style.background = '#4a5568';
-                  }, 1500);
-                });
-              }
-            }
-          </script>
         </body>
         </html>
       `

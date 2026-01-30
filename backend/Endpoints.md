@@ -54,6 +54,11 @@ Authorization: Bearer <jwt-token>
 ```
 **Example Response:** `{ "success": true, "token": "jwt_token", "user": {...} }`
 
+#### `POST /auth/logout`
+**Purpose:** Logout user (invalidate session)
+**Headers:** `Authorization: Bearer <jwt-token>`
+**Example Response:** `{ "success": true, "message": "Logged out successfully" }`
+
 #### `GET /auth/me`
 **Purpose:** Get current customer profile
 **Example Response:** `{ "success": true, "user": {"name": "John", "email": "..."} }`
