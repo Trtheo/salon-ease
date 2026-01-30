@@ -1,103 +1,67 @@
-import { Response } from 'express';
-import mongoose from 'mongoose';
-import Booking from '../models/Booking';
-import Payment from '../models/Payment';
-import Review from '../models/Review';
-import Salon from '../models/Salon';
+import { Request, Response } from 'express';
 import User from '../models/User';
-import { AuthRequest } from '../middleware/auth';
+import Salon from '../models/Salon';
+import Booking from '../models/Booking';
+import Service from '../models/Service';
 
-// Customer Analytics
-export const getCustomerAnalytics = async (req: AuthRequest, res: Response) => {
+export const getSystemAnalytics = async (req: Request, res: Response) => {
   try {
-    const { salonId } = req.params;
-    const { period = '30' } = req.query; // days
-    const userId = req.user!._id;
-
-    // Verify salon ownership
-    const salon = await Salon.findOne({ _id: salonId, owner: userId });
-    if (!salon) {
-      return res.status(403).json({
-        success: false,
-        error: 'Not authorized'
-      });
-    }
-
-    const startDate = new Date();
-    startDate.setDate(startDate.getDate() - parseInt(period as string));
-
-    // Customer behavior analysis
-    const customerStats = await Booking.aggregate([
-      {
-        $match: {
-          salon: new mongoose.Types.ObjectId(salonId),
-          createdAt: { $gte: startDate }
-        }
-      },
-      {
-        $group: {
-          _id: '$customer',
-          totalBookings: { $sum: 1 },
-          totalSpent: { $sum: '$totalAmount' },
-          lastBooking: { $max: '$createdAt' }
-        }
-      },
-      {
-        $lookup: {
-          from: 'users',
-          localField: '_id',
-          foreignField: '_id',
-          as: 'customer'
-        }
-      },
-      { $unwind: '$customer' },
-      {
-        $project: {
-          customerName: '$customer.name',
-          customerEmail: '$customer.email',
-          totalBookings: 1,
-          totalSpent: 1,
-          lastBooking: 1,
-          avgBookingValue: { $divide: ['$totalSpent', '$totalBookings'] }
-        }
-      },
-      { $sort: { totalSpent: -1 } },
-      { $limit: 20 }
+    const [
+      totalUsers,
+      totalSalons,
+      totalBookings,
+      totalServices,
+      verifiedSalons,
+      pendingBookings,
+      completedBookings,
+      monthlyBookings,
+      recentUsers
+    ] = await Promise.all([
+      User.countDocuments(),
+      Salon.countDocuments(),
+      Booking.countDocuments(),
+      Service.countDocuments(),
+      Salon.countDocuments({ isVerified: true }),
+      Booking.countDocuments({ status: 'pending' }),
+      Booking.countDocuments({ status: 'completed' }),
+      Booking.countDocuments({
+        createdAt: { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) }
+      }),
+      User.countDocuments({
+        createdAt: { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) }
+      })
     ]);
 
-    // New vs returning customers
-    const customerTypes = await Booking.aggregate([
-      {
-        $match: {
-          salon: new mongoose.Types.ObjectId(salonId),
-          createdAt: { $gte: startDate }
-        }
-      },
-      {
-        $group: {
-          _id: '$customer',
-          bookingCount: { $sum: 1 },
-          firstBooking: { $min: '$createdAt' }
-        }
-      },
-      {
-        $group: {
-          _id: null,
-          newCustomers: {
-            $sum: { $cond: [{ $eq: ['$bookingCount', 1] }, 1, 0] }
-          },
-          returningCustomers: {
-            $sum: { $cond: [{ $gt: ['$bookingCount', 1] }, 1, 0] }
-          }
-        }
-      }
+    const usersByRole = await User.aggregate([
+      { $group: { _id: '$role', count: { $sum: 1 } } }
     ]);
 
-    res.json({
+    const bookingsByStatus = await Booking.aggregate([
+      { $group: { _id: '$status', count: { $sum: 1 } } }
+    ]);
+
+    res.status(200).json({
       success: true,
       data: {
-        topCustomers: customerStats,
-        customerTypes: customerTypes[0] || { newCustomers: 0, returningCustomers: 0 }
+        overview: {
+          totalUsers,
+          totalSalons,
+          totalBookings,
+          totalServices,
+          verifiedSalons,
+          pendingBookings,
+          completedBookings,
+          monthlyBookings,
+          recentUsers
+        },
+        usersByRole: usersByRole.reduce((acc, item) => {
+          acc[item._id] = item.count;
+          return acc;
+        }, {}),
+        bookingsByStatus: bookingsByStatus.reduce((acc, item) => {
+          acc[item._id] = item.count;
+          return acc;
+        }, {})
       }
     });
   } catch (error: any) {
@@ -108,234 +72,136 @@ export const getCustomerAnalytics = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Revenue Reports
-export const getRevenueReports = async (req: AuthRequest, res: Response) => {
+export const getUserAnalytics = async (req: Request, res: Response) => {
   try {
-    const { salonId } = req.params;
-    const { period = 'month' } = req.query; // day, week, month, year
-    const userId = req.user!._id;
+    const users = await User.find()
+      .select('name email role isVerified createdAt')
+      .sort({ createdAt: -1 })
+      .limit(50);
 
-    // Verify salon ownership
-    const salon = await Salon.findOne({ _id: salonId, owner: userId });
-    if (!salon) {
-      return res.status(403).json({
-        success: false,
-        error: 'Not authorized'
-      });
-    }
+    const userGrowth = await User.aggregate([
+      {
+        $group: {
+          _id: {
+            year: { $year: '$createdAt' },
+            month: { $month: '$createdAt' }
+          },
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { '_id.year': -1, '_id.month': -1 } },
+      { $limit: 12 }
+    ]);
 
-    let groupBy: any;
-    let startDate = new Date();
+    res.status(200).json({
+      success: true,
+      data: {
+        users,
+        userGrowth
+      }
+    });
+  } catch (error: any) {
+    res.status(400).json({
+      success: false,
+      error: error.message
+    });
+  }
+};
 
-    switch (period) {
-      case 'day':
-        groupBy = { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } };
-        startDate.setDate(startDate.getDate() - 30);
-        break;
-      case 'week':
-        groupBy = { $dateToString: { format: '%Y-W%U', date: '$createdAt' } };
-        startDate.setDate(startDate.getDate() - 84); // 12 weeks
-        break;
-      case 'month':
-        groupBy = { $dateToString: { format: '%Y-%m', date: '$createdAt' } };
-        startDate.setMonth(startDate.getMonth() - 12);
-        break;
-      case 'year':
-        groupBy = { $dateToString: { format: '%Y', date: '$createdAt' } };
-        startDate.setFullYear(startDate.getFullYear() - 3);
-        break;
-    }
+export const getBookingAnalytics = async (req: Request, res: Response) => {
+  try {
+    const bookings = await Booking.find()
+      .populate('salon', 'name')
+      .populate('service', 'name price')
+      .populate('customer', 'name email')
+      .sort({ createdAt: -1 })
+      .limit(50);
 
-    // Revenue over time
-    const revenueData = await Payment.aggregate([
+    const bookingTrends = await Booking.aggregate([
+      {
+        $group: {
+          _id: {
+            year: { $year: '$createdAt' },
+            month: { $month: '$createdAt' }
+          },
+          count: { $sum: 1 },
+          revenue: { $sum: '$totalAmount' }
+        }
+      },
+      { $sort: { '_id.year': -1, '_id.month': -1 } },
+      { $limit: 12 }
+    ]);
+
+    const topSalons = await Booking.aggregate([
+      { $group: { _id: '$salon', bookingCount: { $sum: 1 } } },
+      { $sort: { bookingCount: -1 } },
+      { $limit: 10 },
+      {
+        $lookup: {
+          from: 'salons',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'salon'
+        }
+      },
+      { $unwind: '$salon' },
+      {
+        $project: {
+          salonName: '$salon.name',
+          bookingCount: 1
+        }
+      }
+    ]);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        recentBookings: bookings,
+        bookingTrends,
+        topSalons
+      }
+    });
+  } catch (error: any) {
+    res.status(400).json({
+      success: false,
+      error: error.message
+    });
+  }
+};
+
+export const getSalonAnalytics = async (req: Request, res: Response) => {
+  try {
+    const salons = await Salon.find()
+      .populate('owner', 'name email')
+      .sort({ createdAt: -1 })
+      .limit(50);
+
+    const salonStats = await Salon.aggregate([
       {
         $lookup: {
           from: 'bookings',
-          localField: 'booking',
-          foreignField: '_id',
-          as: 'booking'
-        }
-      },
-      { $unwind: '$booking' },
-      {
-        $match: {
-          'booking.salon': new mongoose.Types.ObjectId(salonId),
-          status: 'completed',
-          createdAt: { $gte: startDate }
-        }
-      },
-      {
-        $group: {
-          _id: groupBy,
-          totalRevenue: { $sum: '$amount' },
-          transactionCount: { $sum: 1 }
-        }
-      },
-      { $sort: { _id: 1 } }
-    ]);
-
-    // Service performance
-    const servicePerformance = await Booking.aggregate([
-      {
-        $match: {
-          salon: new mongoose.Types.ObjectId(salonId),
-          status: 'completed',
-          createdAt: { $gte: startDate }
-        }
-      },
-      {
-        $lookup: {
-          from: 'services',
-          localField: 'service',
-          foreignField: '_id',
-          as: 'service'
-        }
-      },
-      { $unwind: '$service' },
-      {
-        $group: {
-          _id: '$service._id',
-          serviceName: { $first: '$service.name' },
-          bookingCount: { $sum: 1 },
-          totalRevenue: { $sum: '$totalAmount' },
-          avgPrice: { $avg: '$totalAmount' }
-        }
-      },
-      { $sort: { totalRevenue: -1 } }
-    ]);
-
-    res.json({
-      success: true,
-      data: {
-        revenueOverTime: revenueData,
-        servicePerformance
-      }
-    });
-  } catch (error: any) {
-    res.status(400).json({
-      success: false,
-      error: error.message
-    });
-  }
-};
-
-// Booking Trends
-export const getBookingTrends = async (req: AuthRequest, res: Response) => {
-  try {
-    const { salonId } = req.params;
-    const userId = req.user!._id;
-
-    // Verify salon ownership
-    const salon = await Salon.findOne({ _id: salonId, owner: userId });
-    if (!salon) {
-      return res.status(403).json({
-        success: false,
-        error: 'Not authorized'
-      });
-    }
-
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-    // Peak hours analysis
-    const peakHours = await Booking.aggregate([
-      {
-        $match: {
-          salon: new mongoose.Types.ObjectId(salonId),
-          createdAt: { $gte: thirtyDaysAgo }
-        }
-      },
-      {
-        $group: {
-          _id: '$time',
-          bookingCount: { $sum: 1 }
-        }
-      },
-      { $sort: { bookingCount: -1 } },
-      { $limit: 10 }
-    ]);
-
-    // Day of week analysis
-    const dayOfWeekTrends = await Booking.aggregate([
-      {
-        $match: {
-          salon: new mongoose.Types.ObjectId(salonId),
-          createdAt: { $gte: thirtyDaysAgo }
-        }
-      },
-      {
-        $group: {
-          _id: { $dayOfWeek: '$date' },
-          bookingCount: { $sum: 1 },
-          avgRevenue: { $avg: '$totalAmount' }
-        }
-      },
-      { $sort: { _id: 1 } }
-    ]);
-
-    // Monthly trends (last 12 months)
-    const yearAgo = new Date();
-    yearAgo.setFullYear(yearAgo.getFullYear() - 1);
-
-    const monthlyTrends = await Booking.aggregate([
-      {
-        $match: {
-          salon: new mongoose.Types.ObjectId(salonId),
-          createdAt: { $gte: yearAgo }
-        }
-      },
-      {
-        $group: {
-          _id: { $dateToString: { format: '%Y-%m', date: '$createdAt' } },
-          bookingCount: { $sum: 1 },
-          totalRevenue: { $sum: '$totalAmount' }
-        }
-      },
-      { $sort: { _id: 1 } }
-    ]);
-
-    // Cancellation analysis
-    const cancellationRate = await Booking.aggregate([
-      {
-        $match: {
-          salon: new mongoose.Types.ObjectId(salonId),
-          createdAt: { $gte: thirtyDaysAgo }
-        }
-      },
-      {
-        $group: {
-          _id: null,
-          totalBookings: { $sum: 1 },
-          cancelledBookings: {
-            $sum: { $cond: [{ $eq: ['$status', 'cancelled'] }, 1, 0] }
-          }
+          localField: '_id',
+          foreignField: 'salon',
+          as: 'bookings'
         }
       },
       {
         $project: {
-          totalBookings: 1,
-          cancelledBookings: 1,
-          cancellationRate: {
-            $multiply: [
-              { $divide: ['$cancelledBookings', '$totalBookings'] },
-              100
-            ]
-          }
+          name: 1,
+          isVerified: 1,
+          createdAt: 1,
+          bookingCount: { $size: '$bookings' },
+          revenue: { $sum: '$bookings.totalAmount' }
         }
-      }
+      },
+      { $sort: { bookingCount: -1 } }
     ]);
 
-    res.json({
+    res.status(200).json({
       success: true,
       data: {
-        peakHours,
-        dayOfWeekTrends,
-        monthlyTrends,
-        cancellationAnalysis: cancellationRate[0] || {
-          totalBookings: 0,
-          cancelledBookings: 0,
-          cancellationRate: 0
-        }
+        salons,
+        salonStats
       }
     });
   } catch (error: any) {

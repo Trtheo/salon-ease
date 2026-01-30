@@ -80,9 +80,6 @@ export const verifyRegistration = async (req: Request, res: Response) => {
   try {
     const { name, email, password, phone, role, code } = req.body;
 
-    console.log('Verifying registration with code:', code);
-    console.log('Looking for OTP with phone:', phone);
-
     // Verify OTP - check both phone and email
     const otp = await OTP.findOne({
       $or: [
@@ -90,8 +87,6 @@ export const verifyRegistration = async (req: Request, res: Response) => {
         { email, code, isUsed: false, expiresAt: { $gt: new Date() } }
       ]
     });
-
-    console.log('Found OTP:', otp);
 
     if (!otp) {
       // For development, allow a test code
@@ -111,7 +106,7 @@ export const verifyRegistration = async (req: Request, res: Response) => {
       email,
       password,
       phone,
-      role,
+      role: role || 'customer',
       isVerified: true
     });
 

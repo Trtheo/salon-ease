@@ -1,5 +1,5 @@
 import express from 'express';
-import { getServices, createService } from '../controllers/services';
+import { getServices, getService, createService, updateService, deleteService } from '../controllers/services';
 import { protect, authorize } from '../middleware/auth';
 
 const router = express.Router();
@@ -85,5 +85,67 @@ const router = express.Router();
 router.route('/')
   .get(getServices)
   .post(protect, authorize('salon_owner', 'admin'), createService);
+
+/**
+ * @swagger
+ * /api/services/{id}:
+ *   get:
+ *     summary: Get service by ID
+ *     tags: [3. Customer - Services & Availability]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Service ID
+ *     responses:
+ *       200:
+ *         description: Service details
+ *       404:
+ *         description: Service not found
+ *   put:
+ *     summary: Update service (Salon Owner/Admin only)
+ *     tags: [12. Salon Owner - Services Management]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Service'
+ *     responses:
+ *       200:
+ *         description: Service updated successfully
+ *       403:
+ *         description: Not authorized
+ *   delete:
+ *     summary: Delete service (Salon Owner/Admin only)
+ *     tags: [12. Salon Owner - Services Management]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Service deleted successfully
+ *       403:
+ *         description: Not authorized
+ */
+router.route('/:id')
+  .get(getService)
+  .put(protect, authorize('salon_owner', 'admin'), updateService)
+  .delete(protect, authorize('salon_owner', 'admin'), deleteService);
 
 export default router;

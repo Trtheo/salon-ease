@@ -3,9 +3,9 @@ import Salon from '../models/Salon';
 
 export const getNearestSalons = async (req: Request, res: Response) => {
   try {
-    const { latitude, longitude, radius = 10 } = req.query;
+    const { lat, lng, radius = 10 } = req.query;
 
-    if (!latitude || !longitude) {
+    if (!lat || !lng) {
       return res.status(400).json({
         success: false,
         error: 'Latitude and longitude are required'
@@ -37,13 +37,13 @@ export const getNearestSalons = async (req: Request, res: Response) => {
 
 export const updateUserLocation = async (req: any, res: Response) => {
   try {
-    const { latitude, longitude, address } = req.body;
+    const { lat, lng, address } = req.body;
 
     // Store user location (extend User model if needed)
     res.status(200).json({
       success: true,
       message: 'Location updated successfully',
-      data: { latitude, longitude, address }
+      data: { lat, lng, address }
     });
   } catch (error: any) {
     res.status(400).json({

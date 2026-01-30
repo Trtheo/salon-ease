@@ -1,6 +1,10 @@
 import { Request, Response } from 'express';
 import Booking from '../models/Booking';
+import Salon from '../models/Salon';
+import Service from '../models/Service';
+import User from '../models/User';
 import { isValidTimeSlot } from '../utils/helpers';
+import { sendAppointmentConfirmationEmail, sendAppointmentNotificationEmail } from '../utils/email';
 
 export const getBookings = async (req: any, res: Response) => {
   try {
@@ -51,6 +55,60 @@ export const createBooking = async (req: any, res: Response) => {
 
     req.body.customer = req.user.id;
     const booking = await Booking.create(req.body);
+
+    // Get booking details for email notifications
+    const populatedBooking = await Booking.findById(booking._id)
+      .populate('salon', 'name owner')
+      .populate('service', 'name price')
+      .populate('customer', 'name email');
+
+    if (populatedBooking) {
+      const customer = populatedBooking.customer as any;
+      const salonData = populatedBooking.salon as any;
+      const serviceData = populatedBooking.service as any;
+
+      // Send confirmation email to customer
+      await sendAppointmentConfirmationEmail(
+        customer.email,
+        customer.name,
+        salonData.name,
+        serviceData.name,
+        date,
+        time,
+        serviceData.price
+      );
+
+      // Get salon owner details
+      const salonOwner = await User.findById(salonData.owner);
+      if (salonOwner) {
+        // Send notification to salon owner
+        await sendAppointmentNotificationEmail(
+          salonOwner.email,
+          salonOwner.name,
+          customer.name,
+          salonData.name,
+          serviceData.name,
+          date,
+          time,
+          true
+        );
+      }
+
+      // Send notification to admin
+      const admin = await User.findOne({ role: 'admin' });
+      if (admin) {
+        await sendAppointmentNotificationEmail(
+          admin.email,
+          admin.name,
+          customer.name,
+          salonData.name,
+          serviceData.name,
+          date,
+          time,
+          false
+        );
+      }
+    }
 
     res.status(201).json({
       success: true,

@@ -3,7 +3,9 @@ import {
   getMySalons,
   getSalonBookings,
   updateBookingStatus,
-  getSalonStats
+  getSalonStats,
+  getSalonAnalytics,
+  getOwnerOverview
 } from '../controllers/salonOwner';
 import { protect, authorize } from '../middleware/auth';
 
@@ -152,6 +154,40 @@ router.get('/salons/:salonId/stats', getSalonStats);
  *       404:
  *         description: Booking not found
  */
+/**
+ * @swagger
+ * /api/salon-owner/overview:
+ *   get:
+ *     summary: Get owner overview analytics (Salon Owner only)
+ *     tags: [16. Salon Owner - Analytics]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Owner overview analytics
+ */
+router.get('/overview', getOwnerOverview);
+
+/**
+ * @swagger
+ * /api/salon-owner/salons/{salonId}/analytics:
+ *   get:
+ *     summary: Get detailed salon analytics (Salon Owner only)
+ *     tags: [16. Salon Owner - Analytics]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: salonId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Detailed salon analytics
+ */
+router.get('/salons/:salonId/analytics', getSalonAnalytics);
+
 router.put('/bookings/:bookingId/status', updateBookingStatus);
 
 export default router;
