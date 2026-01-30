@@ -13,7 +13,7 @@ const router = express.Router();
  * /api/search/salons:
  *   get:
  *     summary: Advanced salon search with filters
- *     tags: [Search]
+ *     tags: [23. Search & Filters]
  *     parameters:
  *       - in: query
  *         name: q
@@ -80,7 +80,7 @@ router.get('/salons', advancedSalonSearch);
  * /api/search/services:
  *   get:
  *     summary: Search services with filters
- *     tags: [Search]
+ *     tags: [23. Search & Filters]
  *     parameters:
  *       - in: query
  *         name: q
@@ -138,7 +138,7 @@ router.get('/services', searchServices);
  * /api/search/filters:
  *   get:
  *     summary: Get available search filters and options
- *     tags: [Search]
+ *     tags: [23. Search & Filters]
  *     responses:
  *       200:
  *         description: Available filter options
@@ -185,7 +185,7 @@ router.get('/filters', getSearchFilters);
  * /api/search/popular:
  *   get:
  *     summary: Get popular searches and suggestions
- *     tags: [Search]
+ *     tags: [23. Search & Filters]
  *     responses:
  *       200:
  *         description: Popular search data

@@ -51,7 +51,7 @@ router.use(protect);
  * /api/video-calls/initiate:
  *   post:
  *     summary: Initiate video call
- *     tags: [Video Calls]
+ *     tags: [8. Customer - Communication]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -95,7 +95,7 @@ router.post('/initiate', initiateCall);
  * /api/video-calls/{callId}/join:
  *   post:
  *     summary: Join video call
- *     tags: [Video Calls]
+ *     tags: [8. Customer - Communication]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -141,7 +141,7 @@ router.post('/:callId/join', joinCall);
  * /api/video-calls/{callId}/end:
  *   put:
  *     summary: End video call
- *     tags: [Video Calls]
+ *     tags: [8. Customer - Communication]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -161,7 +161,7 @@ router.put('/:callId/end', endCall);
  * /api/video-calls/history:
  *   get:
  *     summary: Get call history
- *     tags: [Video Calls]
+ *     tags: [8. Customer - Communication]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -210,7 +210,7 @@ router.get('/history', getCallHistory);
  * /api/video-calls/active:
  *   get:
  *     summary: Get active calls
- *     tags: [Video Calls]
+ *     tags: [8. Customer - Communication]
  *     security:
  *       - bearerAuth: []
  *     responses:

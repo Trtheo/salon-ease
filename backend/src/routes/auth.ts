@@ -51,7 +51,7 @@ const router = express.Router();
  * /api/auth/register:
  *   post:
  *     summary: Register a new user (sends OTP to both email and SMS)
- *     tags: [Authentication]
+ *     tags: [1. Customer - Authentication]
  *     requestBody:
  *       required: true
  *       content:
@@ -71,7 +71,7 @@ router.post('/register', validateRegister, handleValidationErrors, register);
  * /api/auth/verify-registration:
  *   post:
  *     summary: Verify OTP and complete registration
- *     tags: [Authentication]
+ *     tags: [1. Customer - Authentication]
  *     requestBody:
  *       required: true
  *       content:
@@ -103,7 +103,7 @@ router.post('/verify-registration', verifyRegistration);
  * /api/auth/login:
  *   post:
  *     summary: Login user
- *     tags: [Authentication]
+ *     tags: [1. Customer - Authentication]
  *     requestBody:
  *       required: true
  *       content:
@@ -136,7 +136,7 @@ router.post('/login', validateLogin, handleValidationErrors, login);
  * /api/auth/forgot-password:
  *   post:
  *     summary: Send OTP for password reset (choose email or SMS)
- *     tags: [Authentication]
+ *     tags: [1. Customer - Authentication]
  *     requestBody:
  *       required: true
  *       content:
@@ -170,7 +170,7 @@ router.post('/forgot-password', forgotPassword);
  * /api/auth/reset-password:
  *   post:
  *     summary: Reset password with OTP
- *     tags: [Authentication]
+ *     tags: [1. Customer - Authentication]
  *     requestBody:
  *       required: true
  *       content:
@@ -208,7 +208,7 @@ router.post('/reset-password', resetPassword);
  * /api/auth/me:
  *   get:
  *     summary: Get current user profile
- *     tags: [Authentication]
+ *     tags: [1. Customer - Authentication]
  *     security:
  *       - bearerAuth: []
  *     responses:
@@ -234,7 +234,7 @@ export default router;
  * /api/auth/test-otp:
  *   get:
  *     summary: Get OTP for testing (Development only)
- *     tags: [Authentication]
+ *     tags: [1. Customer - Authentication]
  *     parameters:
  *       - in: query
  *         name: phone

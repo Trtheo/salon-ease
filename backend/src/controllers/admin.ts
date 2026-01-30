@@ -1,10 +1,7 @@
 import { Request, Response } from 'express';
 import User from '../models/User';
 import Salon from '../models/Salon';
-
-interface AuthRequest extends Request {
-  user?: any;
-}
+import { AuthRequest } from '../middleware/auth';
 
 // Get all users
 export const getAllUsers = async (req: AuthRequest, res: Response) => {

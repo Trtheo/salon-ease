@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import mongoose from 'mongoose';
 import Review from '../models/Review';
 import Salon from '../models/Salon';
 import Booking from '../models/Booking';
@@ -177,7 +178,7 @@ export const getSalonRatingStats = async (req: Request, res: Response) => {
     const { salonId } = req.params;
 
     const stats = await Review.aggregate([
-      { $match: { salon: new require('mongoose').Types.ObjectId(salonId) } },
+      { $match: { salon: new mongoose.Types.ObjectId(salonId) } },
       {
         $group: {
           _id: '$rating',
@@ -189,7 +190,7 @@ export const getSalonRatingStats = async (req: Request, res: Response) => {
 
     const totalReviews = await Review.countDocuments({ salon: salonId });
     const avgRating = await Review.aggregate([
-      { $match: { salon: new require('mongoose').Types.ObjectId(salonId) } },
+      { $match: { salon: new mongoose.Types.ObjectId(salonId) } },
       { $group: { _id: null, avg: { $avg: '$rating' } } }
     ]);
 
@@ -212,7 +213,7 @@ export const getSalonRatingStats = async (req: Request, res: Response) => {
 // Helper function to update salon rating
 const updateSalonRating = async (salonId: string) => {
   const result = await Review.aggregate([
-    { $match: { salon: new require('mongoose').Types.ObjectId(salonId) } },
+    { $match: { salon: new mongoose.Types.ObjectId(salonId) } },
     {
       $group: {
         _id: null,

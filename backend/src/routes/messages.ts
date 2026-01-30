@@ -66,7 +66,7 @@ router.use(protect);
  * /api/messages/send:
  *   post:
  *     summary: Send a message
- *     tags: [Messages]
+ *     tags: [8. Customer - Communication]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -112,7 +112,7 @@ router.post('/send', sendMessage);
  * /api/messages/conversations:
  *   get:
  *     summary: Get user conversations
- *     tags: [Messages]
+ *     tags: [8. Customer - Communication]
  *     security:
  *       - bearerAuth: []
  *     responses:
@@ -137,7 +137,7 @@ router.get('/conversations', getConversations);
  * /api/messages/{userId}:
  *   get:
  *     summary: Get messages with specific user
- *     tags: [Messages]
+ *     tags: [8. Customer - Communication]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -181,7 +181,7 @@ router.get('/:userId', getMessages);
  * /api/messages/{userId}/read:
  *   put:
  *     summary: Mark messages as read
- *     tags: [Messages]
+ *     tags: [8. Customer - Communication]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -199,7 +199,7 @@ router.get('/:userId', getMessages);
  * /api/messages/voice:
  *   post:
  *     summary: Send voice message
- *     tags: [Messages]
+ *     tags: [8. Customer - Communication]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -244,7 +244,7 @@ router.post('/voice', uploadVoiceNote, uploadVoiceMessage);
  * /api/messages/voice/{messageId}:
  *   get:
  *     summary: Get voice message file
- *     tags: [Messages]
+ *     tags: [8. Customer - Communication]
  *     security:
  *       - bearerAuth: []
  *     parameters:

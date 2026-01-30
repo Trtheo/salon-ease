@@ -9,7 +9,7 @@ const router = express.Router();
  * /api/appointments/request:
  *   post:
  *     summary: Request new appointment (Customer only)
- *     tags: [Appointments]
+ *     tags: [4. Customer - Bookings]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -52,7 +52,7 @@ router.post('/request', protect, authorize('customer'), requestAppointment);
  * /api/appointments/upcoming:
  *   get:
  *     summary: Get upcoming appointments (Customer only)
- *     tags: [Appointments]
+ *     tags: [4. Customer - Bookings]
  *     security:
  *       - bearerAuth: []
  *     responses:
@@ -79,7 +79,7 @@ router.get('/upcoming', protect, authorize('customer'), getUpcomingAppointments)
  * /api/appointments/{id}/status:
  *   get:
  *     summary: Get appointment status (Customer only)
- *     tags: [Appointments]
+ *     tags: [4. Customer - Bookings]
  *     security:
  *       - bearerAuth: []
  *     parameters:

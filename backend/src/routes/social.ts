@@ -68,7 +68,7 @@ router.use(protect);
  * /api/social/favorites:
  *   get:
  *     summary: Get user favorites
- *     tags: [Social]
+ *     tags: [7. Customer - Reviews & Social]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -104,7 +104,7 @@ router.use(protect);
  *         description: Customer access required
  *   post:
  *     summary: Add salon to favorites
- *     tags: [Social]
+ *     tags: [7. Customer - Reviews & Social]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -145,7 +145,7 @@ router.route('/favorites')
  * /api/social/favorites/{salonId}:
  *   delete:
  *     summary: Remove salon from favorites
- *     tags: [Social]
+ *     tags: [7. Customer - Reviews & Social]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -159,7 +159,7 @@ router.route('/favorites')
  *         description: Removed from favorites successfully
  *   get:
  *     summary: Check if salon is favorited
- *     tags: [Social]
+ *     tags: [7. Customer - Reviews & Social]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -181,7 +181,7 @@ router.route('/favorites/:salonId')
  * /api/social/referral/generate:
  *   post:
  *     summary: Generate referral code
- *     tags: [Social]
+ *     tags: [7. Customer - Reviews & Social]
  *     security:
  *       - bearerAuth: []
  *     responses:
@@ -208,7 +208,7 @@ router.post('/referral/generate', authorize('customer'), generateReferralCode);
  * /api/social/referral/use:
  *   post:
  *     summary: Use referral code
- *     tags: [Social]
+ *     tags: [7. Customer - Reviews & Social]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -251,7 +251,7 @@ router.post('/referral/use', authorize('customer'), useReferralCode);
  * /api/social/referral/my-referrals:
  *   get:
  *     summary: Get user referrals and stats
- *     tags: [Social]
+ *     tags: [7. Customer - Reviews & Social]
  *     security:
  *       - bearerAuth: []
  *     responses:
@@ -292,7 +292,7 @@ router.get('/referral/my-referrals', authorize('customer'), getUserReferrals);
  * /api/social/share/{salonId}:
  *   post:
  *     summary: Share salon
- *     tags: [Social]
+ *     tags: [7. Customer - Reviews & Social]
  *     security:
  *       - bearerAuth: []
  *     parameters:

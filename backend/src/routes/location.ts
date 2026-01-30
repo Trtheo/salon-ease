@@ -9,7 +9,7 @@ const router = express.Router();
  * /api/location/nearest:
  *   get:
  *     summary: Get nearest salons
- *     tags: [Location]
+ *     tags: [2. Customer - Salon Discovery]
  *     parameters:
  *       - in: query
  *         name: lat
@@ -57,7 +57,7 @@ router.get('/nearest', getNearestSalons);
  * /api/location/update:
  *   put:
  *     summary: Update user location (Customer only)
- *     tags: [Location]
+ *     tags: [2. Customer - Salon Discovery]
  *     security:
  *       - bearerAuth: []
  *     requestBody:

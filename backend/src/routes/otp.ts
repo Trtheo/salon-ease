@@ -33,7 +33,7 @@ const router = express.Router();
  * /api/otp/send:
  *   post:
  *     summary: Send OTP to phone number
- *     tags: [OTP]
+ *     tags: [22. OTP Services]
  *     requestBody:
  *       required: true
  *       content:
@@ -53,7 +53,7 @@ router.post('/send', sendOTP);
  * /api/otp/verify:
  *   post:
  *     summary: Verify OTP code
- *     tags: [OTP]
+ *     tags: [22. OTP Services]
  *     requestBody:
  *       required: true
  *       content:

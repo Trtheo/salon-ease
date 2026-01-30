@@ -9,7 +9,7 @@ const router = express.Router();
  * /api/upload/avatar:
  *   post:
  *     summary: Upload user avatar
- *     tags: [Upload]
+ *     tags: [9. Customer - File Upload]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -76,7 +76,7 @@ router.post('/avatar', protect, uploadAvatar, (req: any, res) => {
  * /api/upload/salon-images:
  *   post:
  *     summary: Upload salon images (Salon Owner/Admin only)
- *     tags: [Upload]
+ *     tags: [17. Salon Owner - File Upload]
  *     security:
  *       - bearerAuth: []
  *     requestBody:

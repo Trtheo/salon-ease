@@ -41,7 +41,7 @@ const router = express.Router();
  * /api/bookings:
  *   get:
  *     summary: Get user bookings (Customer only)
- *     tags: [Bookings]
+ *     tags: [4. Customer - Bookings]
  *     security:
  *       - bearerAuth: []
  *     responses:
@@ -62,7 +62,7 @@ const router = express.Router();
  *         description: Not authorized - Customer access required
  *   post:
  *     summary: Create new booking (Customer only)
- *     tags: [Bookings]
+ *     tags: [4. Customer - Bookings]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -88,7 +88,7 @@ router.route('/')
  * /api/bookings/{id}/cancel:
  *   put:
  *     summary: Cancel booking (Customer only)
- *     tags: [Bookings]
+ *     tags: [4. Customer - Bookings]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -114,7 +114,7 @@ router.route('/:id/cancel')
  * /api/bookings/{id}/reschedule:
  *   put:
  *     summary: Reschedule booking (Customer only)
- *     tags: [Bookings]
+ *     tags: [4. Customer - Bookings]
  *     security:
  *       - bearerAuth: []
  *     parameters:

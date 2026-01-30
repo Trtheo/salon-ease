@@ -55,7 +55,7 @@ const router = express.Router();
  * /api/reviews/submit:
  *   post:
  *     summary: Submit a review (Customer only)
- *     tags: [Reviews]
+ *     tags: [7. Customer - Reviews & Social]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -113,7 +113,7 @@ router.post('/submit', protect, authorize('customer'), submitReview);
  * /api/reviews/salon/{salonId}:
  *   get:
  *     summary: Get salon reviews
- *     tags: [Reviews]
+ *     tags: [7. Customer - Reviews & Social]
  *     parameters:
  *       - in: path
  *         name: salonId
@@ -173,7 +173,7 @@ router.get('/salon/:salonId', getSalonReviews);
  * /api/reviews/salon/{salonId}/stats:
  *   get:
  *     summary: Get salon rating statistics
- *     tags: [Reviews]
+ *     tags: [7. Customer - Reviews & Social]
  *     parameters:
  *       - in: path
  *         name: salonId
@@ -215,7 +215,7 @@ router.get('/salon/:salonId/stats', getSalonRatingStats);
  * /api/reviews/my-reviews:
  *   get:
  *     summary: Get user's reviews (Customer only)
- *     tags: [Reviews]
+ *     tags: [7. Customer - Reviews & Social]
  *     security:
  *       - bearerAuth: []
  *     responses:
@@ -229,7 +229,7 @@ router.get('/my-reviews', protect, authorize('customer'), getUserReviews);
  * /api/reviews/{reviewId}/respond:
  *   put:
  *     summary: Respond to review (Salon Owner only)
- *     tags: [Reviews]
+ *     tags: [15. Salon Owner - Reviews Management]
  *     security:
  *       - bearerAuth: []
  *     parameters:

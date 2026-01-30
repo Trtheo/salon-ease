@@ -1,4 +1,5 @@
 import { Response } from 'express';
+import mongoose from 'mongoose';
 import Booking from '../models/Booking';
 import Payment from '../models/Payment';
 import Review from '../models/Review';
@@ -29,7 +30,7 @@ export const getCustomerAnalytics = async (req: AuthRequest, res: Response) => {
     const customerStats = await Booking.aggregate([
       {
         $match: {
-          salon: new require('mongoose').Types.ObjectId(salonId),
+          salon: new mongoose.Types.ObjectId(salonId),
           createdAt: { $gte: startDate }
         }
       },
@@ -68,7 +69,7 @@ export const getCustomerAnalytics = async (req: AuthRequest, res: Response) => {
     const customerTypes = await Booking.aggregate([
       {
         $match: {
-          salon: new require('mongoose').Types.ObjectId(salonId),
+          salon: new mongoose.Types.ObjectId(salonId),
           createdAt: { $gte: startDate }
         }
       },
@@ -158,7 +159,7 @@ export const getRevenueReports = async (req: AuthRequest, res: Response) => {
       { $unwind: '$booking' },
       {
         $match: {
-          'booking.salon': new require('mongoose').Types.ObjectId(salonId),
+          'booking.salon': new mongoose.Types.ObjectId(salonId),
           status: 'completed',
           createdAt: { $gte: startDate }
         }
@@ -177,7 +178,7 @@ export const getRevenueReports = async (req: AuthRequest, res: Response) => {
     const servicePerformance = await Booking.aggregate([
       {
         $match: {
-          salon: new require('mongoose').Types.ObjectId(salonId),
+          salon: new mongoose.Types.ObjectId(salonId),
           status: 'completed',
           createdAt: { $gte: startDate }
         }
@@ -240,7 +241,7 @@ export const getBookingTrends = async (req: AuthRequest, res: Response) => {
     const peakHours = await Booking.aggregate([
       {
         $match: {
-          salon: new require('mongoose').Types.ObjectId(salonId),
+          salon: new mongoose.Types.ObjectId(salonId),
           createdAt: { $gte: thirtyDaysAgo }
         }
       },
@@ -258,7 +259,7 @@ export const getBookingTrends = async (req: AuthRequest, res: Response) => {
     const dayOfWeekTrends = await Booking.aggregate([
       {
         $match: {
-          salon: new require('mongoose').Types.ObjectId(salonId),
+          salon: new mongoose.Types.ObjectId(salonId),
           createdAt: { $gte: thirtyDaysAgo }
         }
       },
@@ -279,7 +280,7 @@ export const getBookingTrends = async (req: AuthRequest, res: Response) => {
     const monthlyTrends = await Booking.aggregate([
       {
         $match: {
-          salon: new require('mongoose').Types.ObjectId(salonId),
+          salon: new mongoose.Types.ObjectId(salonId),
           createdAt: { $gte: yearAgo }
         }
       },
@@ -297,7 +298,7 @@ export const getBookingTrends = async (req: AuthRequest, res: Response) => {
     const cancellationRate = await Booking.aggregate([
       {
         $match: {
-          salon: new require('mongoose').Types.ObjectId(salonId),
+          salon: new mongoose.Types.ObjectId(salonId),
           createdAt: { $gte: thirtyDaysAgo }
         }
       },

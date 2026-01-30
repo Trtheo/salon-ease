@@ -74,7 +74,7 @@ router.use(protect);
  * /api/notifications:
  *   get:
  *     summary: Get user notifications
- *     tags: [Notifications]
+ *     tags: [8. Customer - Communication]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -121,7 +121,7 @@ router.get('/', getNotifications);
  * /api/notifications/{notificationId}/read:
  *   put:
  *     summary: Mark notification as read
- *     tags: [Notifications]
+ *     tags: [8. Customer - Communication]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -141,7 +141,7 @@ router.put('/:notificationId/read', markAsRead);
  * /api/notifications/read-all:
  *   put:
  *     summary: Mark all notifications as read
- *     tags: [Notifications]
+ *     tags: [8. Customer - Communication]
  *     security:
  *       - bearerAuth: []
  *     responses:
@@ -155,7 +155,7 @@ router.put('/read-all', markAllAsRead);
  * /api/notifications/preferences:
  *   get:
  *     summary: Get notification preferences
- *     tags: [Notifications]
+ *     tags: [8. Customer - Communication]
  *     security:
  *       - bearerAuth: []
  *     responses:
@@ -172,7 +172,7 @@ router.put('/read-all', markAllAsRead);
  *                   $ref: '#/components/schemas/NotificationPreference'
  *   put:
  *     summary: Update notification preferences
- *     tags: [Notifications]
+ *     tags: [8. Customer - Communication]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -226,7 +226,7 @@ router.route('/preferences')
  * /api/notifications/{notificationId}:
  *   delete:
  *     summary: Delete notification
- *     tags: [Notifications]
+ *     tags: [8. Customer - Communication]
  *     security:
  *       - bearerAuth: []
  *     parameters:

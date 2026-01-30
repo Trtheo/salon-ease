@@ -8,6 +8,46 @@ const transporter = nodemailer.createTransport({
   }
 });
 
+export const sendEmail = async (email: string, subject: string, message: string): Promise<boolean> => {
+  try {
+    const info = await transporter.sendMail({
+      from: '"SalonEase" <niyigabatheo10@gmail.com>',
+      to: email,
+      subject: subject,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>SalonEase</title>
+        </head>
+        <body style="margin: 0; padding: 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f7f7f7;">
+          <div style="max-width: 400px; margin: 0 auto; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); overflow: hidden;">
+            <div style="background: #1a365d; padding: 24px; text-align: center;">
+              <h1 style="color: white; margin: 0; font-size: 18px; font-weight: 500;">SalonEase</h1>
+            </div>
+            <div style="padding: 32px 24px;">
+              <h2 style="color: #2d3748; margin: 0 0 16px 0; font-size: 16px; font-weight: 500;">${subject}</h2>
+              <p style="color: #718096; margin: 0; font-size: 14px; line-height: 1.5;">${message}</p>
+            </div>
+            <div style="background: #f7fafc; padding: 16px 24px; border-top: 1px solid #e2e8f0;">
+              <p style="color: #718096; font-size: 11px; margin: 0; text-align: center;">SalonEase Team</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `
+    });
+    
+    console.log('Email sent successfully');
+    return true;
+  } catch (error) {
+    console.error('Email sending failed:', error);
+    return false;
+  }
+};
+
 export const sendOTPEmail = async (email: string, code: string): Promise<boolean> => {
   try {
     console.log(` Email OTP for ${email}: ${code}`);

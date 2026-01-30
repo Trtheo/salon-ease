@@ -35,7 +35,7 @@ const router = express.Router();
  * /api/payments:
  *   post:
  *     summary: Create payment (Customer only)
- *     tags: [Payments]
+ *     tags: [6. Customer - Payments]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -53,7 +53,7 @@ const router = express.Router();
  *         description: Not authorized - Customer access required
  *   get:
  *     summary: Get payment history (Customer only)
- *     tags: [Payments]
+ *     tags: [6. Customer - Payments]
  *     security:
  *       - bearerAuth: []
  *     responses:

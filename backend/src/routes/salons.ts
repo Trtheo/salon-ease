@@ -49,7 +49,7 @@ const router = express.Router();
  * /api/salons:
  *   get:
  *     summary: Get all salons
- *     tags: [Salons]
+ *     tags: [2. Customer - Salon Discovery]
  *     parameters:
  *       - in: query
  *         name: page
@@ -77,7 +77,7 @@ const router = express.Router();
  *                     $ref: '#/components/schemas/Salon'
  *   post:
  *     summary: Create a new salon (Salon Owner/Admin only)
- *     tags: [Salons]
+ *     tags: [11. Salon Owner - Salon Setup]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -101,7 +101,7 @@ router.route('/')
  * /api/salons/search:
  *   get:
  *     summary: Search salons
- *     tags: [Salons]
+ *     tags: [2. Customer - Salon Discovery]
  *     parameters:
  *       - in: query
  *         name: q
@@ -125,7 +125,7 @@ router.route('/search')
  * /api/salons/{id}:
  *   get:
  *     summary: Get salon by ID
- *     tags: [Salons]
+ *     tags: [2. Customer - Salon Discovery]
  *     parameters:
  *       - in: path
  *         name: id
@@ -140,7 +140,7 @@ router.route('/search')
  *         description: Salon not found
  *   put:
  *     summary: Update salon (Salon Owner/Admin only)
- *     tags: [Salons]
+ *     tags: [11. Salon Owner - Salon Setup]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -162,7 +162,7 @@ router.route('/search')
  *         description: Not authorized
  *   delete:
  *     summary: Delete salon (Salon Owner/Admin only)
- *     tags: [Salons]
+ *     tags: [11. Salon Owner - Salon Setup]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -187,7 +187,7 @@ router.route('/:id')
  * /api/salons/{id}/services:
  *   get:
  *     summary: Get salon services
- *     tags: [Salons]
+ *     tags: [3. Customer - Services & Availability]
  *     parameters:
  *       - in: path
  *         name: id

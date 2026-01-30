@@ -1,5 +1,5 @@
 import { Response } from 'express';
-import { AuthRequest } from '../types';
+import { AuthRequest } from '../middleware/auth';
 import Salon from '../models/Salon';
 import Booking from '../models/Booking';
 

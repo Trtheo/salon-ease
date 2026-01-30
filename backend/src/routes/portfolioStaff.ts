@@ -101,7 +101,7 @@ const router = express.Router();
  * /api/portfolio/{salonId}:
  *   get:
  *     summary: Get salon portfolio
- *     tags: [Portfolio]
+ *     tags: [13. Salon Owner - Staff & Portfolio]
  *     parameters:
  *       - in: path
  *         name: salonId
@@ -130,7 +130,7 @@ const router = express.Router();
  *                     $ref: '#/components/schemas/Portfolio'
  *   post:
  *     summary: Create portfolio item (Salon Owner only)
- *     tags: [Portfolio]
+ *     tags: [13. Salon Owner - Staff & Portfolio]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -207,7 +207,7 @@ router.route('/portfolio/:salonId')
  * /api/portfolio/item/{portfolioId}:
  *   put:
  *     summary: Update portfolio item (Salon Owner only)
- *     tags: [Portfolio]
+ *     tags: [13. Salon Owner - Staff & Portfolio]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -235,7 +235,7 @@ router.put('/portfolio/item/:portfolioId', protect, authorize('salon_owner'), up
  * /api/staff/{salonId}:
  *   get:
  *     summary: Get salon staff
- *     tags: [Staff]
+ *     tags: [13. Salon Owner - Staff & Portfolio]
  *     parameters:
  *       - in: path
  *         name: salonId
@@ -259,7 +259,7 @@ router.put('/portfolio/item/:portfolioId', protect, authorize('salon_owner'), up
  *                     $ref: '#/components/schemas/Staff'
  *   post:
  *     summary: Add staff member (Salon Owner only)
- *     tags: [Staff]
+ *     tags: [13. Salon Owner - Staff & Portfolio]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -313,7 +313,7 @@ router.route('/staff/:salonId')
  * /api/staff/member/{staffId}:
  *   put:
  *     summary: Update staff member (Salon Owner only)
- *     tags: [Staff]
+ *     tags: [13. Salon Owner - Staff & Portfolio]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -335,7 +335,7 @@ router.put('/staff/member/:staffId', protect, authorize('salon_owner'), updateSt
  * /api/staff/{staffId}/availability:
  *   get:
  *     summary: Get staff availability
- *     tags: [Staff]
+ *     tags: [13. Salon Owner - Staff & Portfolio]
  *     parameters:
  *       - in: path
  *         name: staffId
@@ -375,3 +375,4 @@ router.put('/staff/member/:staffId', protect, authorize('salon_owner'), updateSt
  *                         end:
  *                           type: string
  */
+export default router;

@@ -20,7 +20,7 @@ router.use(authorize('admin'));
  * /api/admin/users:
  *   get:
  *     summary: Get all users (Admin only)
- *     tags: [Admin]
+ *     tags: [19. Admin - User Management]
  *     security:
  *       - bearerAuth: []
  *     responses:
@@ -47,7 +47,7 @@ router.get('/users', getAllUsers);
  * /api/admin/salon-owners:
  *   get:
  *     summary: Get all salon owners (Admin only)
- *     tags: [Admin]
+ *     tags: [19. Admin - User Management]
  *     security:
  *       - bearerAuth: []
  *     responses:
@@ -61,7 +61,7 @@ router.get('/salon-owners', getSalonOwners);
  * /api/admin/users/{userId}/role:
  *   put:
  *     summary: Update user role (Admin only)
- *     tags: [Admin]
+ *     tags: [19. Admin - User Management]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -91,7 +91,7 @@ router.put('/users/:userId/role', updateUserRole);
  * /api/admin/users/{userId}:
  *   delete:
  *     summary: Delete user (Admin only)
- *     tags: [Admin]
+ *     tags: [19. Admin - User Management]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -111,7 +111,7 @@ router.delete('/users/:userId', deleteUser);
  * /api/admin/salons:
  *   get:
  *     summary: Get all salons (Admin only)
- *     tags: [Admin]
+ *     tags: [20. Admin - Salon Management]
  *     security:
  *       - bearerAuth: []
  *     responses:
@@ -125,7 +125,7 @@ router.get('/salons', getAllSalons);
  * /api/admin/salons/{salonId}/status:
  *   put:
  *     summary: Update salon status (Admin only)
- *     tags: [Admin]
+ *     tags: [20. Admin - Salon Management]
  *     security:
  *       - bearerAuth: []
  *     parameters:

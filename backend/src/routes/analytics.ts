@@ -16,7 +16,7 @@ router.use(authorize('salon_owner', 'admin'));
  * /api/analytics/{salonId}/customers:
  *   get:
  *     summary: Get customer analytics (Salon Owner/Admin only)
- *     tags: [Analytics]
+ *     tags: [16. Salon Owner - Analytics]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -82,7 +82,7 @@ router.get('/:salonId/customers', getCustomerAnalytics);
  * /api/analytics/{salonId}/revenue:
  *   get:
  *     summary: Get revenue reports (Salon Owner/Admin only)
- *     tags: [Analytics]
+ *     tags: [16. Salon Owner - Analytics]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -143,7 +143,7 @@ router.get('/:salonId/revenue', getRevenueReports);
  * /api/analytics/{salonId}/booking-trends:
  *   get:
  *     summary: Get booking trends analysis (Salon Owner/Admin only)
- *     tags: [Analytics]
+ *     tags: [16. Salon Owner - Analytics]
  *     security:
  *       - bearerAuth: []
  *     parameters:

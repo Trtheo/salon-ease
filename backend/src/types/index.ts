@@ -32,6 +32,7 @@ export interface ISalon {
   services: string[];
   owner: any;
   rating: number;
+  reviewCount: number;
   isVerified: boolean;
   status?: string;
   createdAt?: Date;

@@ -228,7 +228,7 @@ export const getStaffAvailability = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    const dayOfWeek = new Date(date as string).toLocaleDateString('en-US', { weekday: 'lowercase' });
+    const dayOfWeek = new Date(date as string).toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
     const workingHours = staff.workingHours[dayOfWeek];
 
     res.json({

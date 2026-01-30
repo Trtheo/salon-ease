@@ -8,7 +8,7 @@ const router = express.Router();
  * /api/availability/slots:
  *   get:
  *     summary: Get available time slots
- *     tags: [Availability]
+ *     tags: [3. Customer - Services & Availability]
  *     parameters:
  *       - in: query
  *         name: salon

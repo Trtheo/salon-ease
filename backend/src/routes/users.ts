@@ -30,7 +30,7 @@ const router = express.Router();
  * /api/users/profile:
  *   get:
  *     summary: Get user profile
- *     tags: [Users]
+ *     tags: [1. Customer - Authentication]
  *     security:
  *       - bearerAuth: []
  *     responses:
@@ -47,7 +47,7 @@ const router = express.Router();
  *                   $ref: '#/components/schemas/UserProfile'
  *   put:
  *     summary: Update user profile
- *     tags: [Users]
+ *     tags: [1. Customer - Authentication]
  *     security:
  *       - bearerAuth: []
  *     requestBody:

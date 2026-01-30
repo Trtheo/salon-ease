@@ -136,7 +136,7 @@ router.use(protect);
  * /api/advanced-booking/recurring:
  *   post:
  *     summary: Create recurring booking (Customer only)
- *     tags: [Advanced Booking]
+ *     tags: [5. Customer - Advanced Booking]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -210,7 +210,7 @@ router.use(protect);
  *         description: Customer access required
  *   get:
  *     summary: Get user recurring bookings (Customer only)
- *     tags: [Advanced Booking]
+ *     tags: [5. Customer - Advanced Booking]
  *     security:
  *       - bearerAuth: []
  *     responses:
@@ -239,7 +239,7 @@ router.route('/recurring')
  * /api/advanced-booking/recurring/{recurringId}/cancel:
  *   put:
  *     summary: Cancel recurring booking (Customer only)
- *     tags: [Advanced Booking]
+ *     tags: [5. Customer - Advanced Booking]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -259,7 +259,7 @@ router.put('/recurring/:recurringId/cancel', authorize('customer'), cancelRecurr
  * /api/advanced-booking/group:
  *   post:
  *     summary: Create group booking (Customer only)
- *     tags: [Advanced Booking]
+ *     tags: [5. Customer - Advanced Booking]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -337,7 +337,7 @@ router.post('/group', authorize('customer'), createGroupBooking);
  * /api/advanced-booking/group/{groupBookingId}/respond:
  *   put:
  *     summary: Respond to group booking invitation (Customer only)
- *     tags: [Advanced Booking]
+ *     tags: [5. Customer - Advanced Booking]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -369,7 +369,7 @@ router.put('/group/:groupBookingId/respond', authorize('customer'), respondToGro
  * /api/advanced-booking/waitlist:
  *   post:
  *     summary: Join waitlist (Customer only)
- *     tags: [Advanced Booking]
+ *     tags: [5. Customer - Advanced Booking]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -419,7 +419,7 @@ router.put('/group/:groupBookingId/respond', authorize('customer'), respondToGro
  *         description: Customer access required
  *   get:
  *     summary: Get user waitlist (Customer only)
- *     tags: [Advanced Booking]
+ *     tags: [5. Customer - Advanced Booking]
  *     security:
  *       - bearerAuth: []
  *     responses:

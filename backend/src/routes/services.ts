@@ -39,7 +39,7 @@ const router = express.Router();
  * /api/services:
  *   get:
  *     summary: Get all services
- *     tags: [Services]
+ *     tags: [3. Customer - Services & Availability]
  *     parameters:
  *       - in: query
  *         name: salon
@@ -67,7 +67,7 @@ const router = express.Router();
  *                     $ref: '#/components/schemas/Service'
  *   post:
  *     summary: Create new service (Salon Owner/Admin only)
- *     tags: [Services]
+ *     tags: [12. Salon Owner - Services Management]
  *     security:
  *       - bearerAuth: []
  *     requestBody:

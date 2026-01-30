@@ -18,7 +18,7 @@ router.use(authorize('salon_owner'));
  * /api/salon-owner/salons:
  *   get:
  *     summary: Get my salons (Salon Owner only)
- *     tags: [Salon Owner]
+ *     tags: [14. Salon Owner - Booking Management]
  *     security:
  *       - bearerAuth: []
  *     responses:
@@ -47,7 +47,7 @@ router.get('/salons', getMySalons);
  * /api/salon-owner/salons/{salonId}/bookings:
  *   get:
  *     summary: Get salon bookings (Salon Owner only)
- *     tags: [Salon Owner]
+ *     tags: [14. Salon Owner - Booking Management]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -83,7 +83,7 @@ router.get('/salons/:salonId/bookings', getSalonBookings);
  * /api/salon-owner/salons/{salonId}/stats:
  *   get:
  *     summary: Get salon statistics (Salon Owner only)
- *     tags: [Salon Owner]
+ *     tags: [14. Salon Owner - Booking Management]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -124,7 +124,7 @@ router.get('/salons/:salonId/stats', getSalonStats);
  * /api/salon-owner/bookings/{bookingId}/status:
  *   put:
  *     summary: Update booking status (Salon Owner only)
- *     tags: [Salon Owner]
+ *     tags: [14. Salon Owner - Booking Management]
  *     security:
  *       - bearerAuth: []
  *     parameters:
