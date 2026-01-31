@@ -1,11 +1,25 @@
 import { Request, Response } from 'express';
 import Salon from '../models/Salon';
+import Service from '../models/Service';
 
 export const searchSalons = async (req: Request, res: Response) => {
   try {
-    const { name, location, service } = req.query;
+    const { q, name, location, service } = req.query;
     let query: any = { isVerified: true };
 
+    // Enhanced search with 'q' parameter - searches across multiple fields
+    if (q) {
+      const searchRegex = { $regex: q, $options: 'i' };
+      query.$or = [
+        { name: searchRegex },
+        { description: searchRegex },
+        { address: searchRegex },
+        { email: searchRegex },
+        { phone: searchRegex }
+      ];
+    }
+
+    // Individual field searches (for backward compatibility)
     if (name) {
       query.name = { $regex: name, $options: 'i' };
     }
@@ -16,7 +30,8 @@ export const searchSalons = async (req: Request, res: Response) => {
 
     const salons = await Salon.find(query)
       .populate('owner', 'name email')
-      .populate('services');
+      .populate('services')
+      .sort({ rating: -1, reviewCount: -1 });
 
     res.status(200).json({
       success: true,

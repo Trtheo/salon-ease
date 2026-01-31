@@ -100,22 +100,46 @@ router.route('/')
  * @swagger
  * /api/salons/search:
  *   get:
- *     summary: Search salons
+ *     summary: Search salons with enhanced multi-field search
  *     tags: [2. Customer - Salon Discovery]
  *     parameters:
  *       - in: query
  *         name: q
  *         schema:
  *           type: string
- *         description: Search query
+ *         description: Universal search query (searches name, description, address, email, phone)
+ *         example: "Paradise"
+ *       - in: query
+ *         name: name
+ *         schema:
+ *           type: string
+ *         description: Search by salon name only
  *       - in: query
  *         name: location
  *         schema:
  *           type: string
- *         description: Location filter
+ *         description: Search by location/address only
+ *       - in: query
+ *         name: service
+ *         schema:
+ *           type: string
+ *         description: Search by service type
  *     responses:
  *       200:
- *         description: Search results
+ *         description: Search results sorted by rating and review count
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 count:
+ *                   type: integer
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Salon'
  */
 router.route('/search')
   .get(searchSalons);
