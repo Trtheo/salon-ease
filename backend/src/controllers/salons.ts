@@ -43,8 +43,33 @@ export const getSalon = async (req: Request, res: Response) => {
 
 export const createSalon = async (req: any, res: Response) => {
   try {
-    req.body.owner = req.user.id;
-    const salon = await Salon.create(req.body);
+    const salonData = { ...req.body };
+    salonData.owner = req.user.id;
+    
+    // Handle uploaded images
+    if (req.files && req.files.length > 0) {
+      salonData.images = req.files.map((file: any) => `/uploads/salons/${file.filename}`);
+    }
+    
+    // Parse JSON fields if they're strings
+    if (typeof salonData.workingHours === 'string') {
+      // Decode HTML entities first
+      const decodedHours = salonData.workingHours
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;/g, "'")
+        .replace(/&amp;/g, '&');
+      salonData.workingHours = JSON.parse(decodedHours);
+    }
+    if (typeof salonData.services === 'string') {
+      // Decode HTML entities first
+      const decodedServices = salonData.services
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;/g, "'")
+        .replace(/&amp;/g, '&');
+      salonData.services = JSON.parse(decodedServices);
+    }
+    
+    const salon = await Salon.create(salonData);
 
     res.status(201).json({
       success: true,
@@ -76,7 +101,26 @@ export const updateSalon = async (req: any, res: Response) => {
       });
     }
 
-    salon = await Salon.findByIdAndUpdate(req.params.id, req.body, {
+    const updateData = { ...req.body };
+    
+    // Handle uploaded images
+    if (req.files && req.files.length > 0) {
+      updateData.images = req.files.map((file: any) => `/uploads/salons/${file.filename}`);
+    }
+    
+    // Parse JSON fields if they're strings
+    if (typeof updateData.workingHours === 'string') {
+      // Decode HTML entities first
+      const decodedHours = updateData.workingHours.replace(/&quot;/g, '"');
+      updateData.workingHours = JSON.parse(decodedHours);
+    }
+    if (typeof updateData.services === 'string') {
+      // Decode HTML entities first
+      const decodedServices = updateData.services.replace(/&quot;/g, '"');
+      updateData.services = JSON.parse(decodedServices);
+    }
+
+    salon = await Salon.findByIdAndUpdate(req.params.id, updateData, {
       new: true,
       runValidators: true
     });

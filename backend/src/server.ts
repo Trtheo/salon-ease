@@ -88,6 +88,6 @@ app.get('/health', (req: express.Request, res: express.Response) => {
 // Error handling
 app.use(errorHandler);
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(` SalonEase API server running on port ${PORT}`);
 });

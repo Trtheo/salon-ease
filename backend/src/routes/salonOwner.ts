@@ -7,9 +7,35 @@ import {
   getSalonAnalytics,
   getOwnerOverview
 } from '../controllers/salonOwner';
+import { createSalon } from '../controllers/salons';
 import { protect, authorize } from '../middleware/auth';
+import multer from 'multer';
+import path from 'path';
 
 const router = express.Router();
+
+// Multer configuration for salon images
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/salons/');
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, 'salon-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({ 
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed'));
+    }
+  }
+});
 
 // Protect all routes and restrict to salon owners
 router.use(protect);
@@ -43,6 +69,60 @@ router.use(authorize('salon_owner'));
  *         description: Salon owner access required
  */
 router.get('/salons', getMySalons);
+
+/**
+ * @swagger
+ * /api/salon-owner/salons:
+ *   post:
+ *     summary: Create a new salon (Salon Owner only)
+ *     tags: [11. Salon Owner - Salon Setup]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - address
+ *               - phone
+ *               - email
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: Salon name
+ *               description:
+ *                 type: string
+ *                 description: Salon description
+ *               address:
+ *                 type: string
+ *                 description: Salon address
+ *               phone:
+ *                 type: string
+ *                 description: Contact phone number
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: Contact email
+ *               images:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   format: binary
+ *                 description: Salon images (max 5 files, 5MB each)
+ *               workingHours:
+ *                 type: string
+ *                 description: JSON string of working hours
+ *               services:
+ *                 type: string
+ *                 description: JSON array of service IDs
+ *     responses:
+ *       201:
+ *         description: Salon created successfully
+ */
+router.post('/salons', upload.array('images', 5), createSalon);
 
 /**
  * @swagger

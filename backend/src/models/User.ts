@@ -15,7 +15,27 @@ const userSchema = new Schema<IUserDocument>({
   phone: { type: String },
   role: { type: String, enum: ['customer', 'salon_owner', 'admin'], default: 'customer' },
   avatar: { type: String },
-  isVerified: { type: Boolean, default: false }
+  isVerified: { type: Boolean, default: false },
+  socialAuth: {
+    google: {
+      uid: String,
+      email: String,
+      name: String,
+      photoURL: String
+    },
+    facebook: {
+      uid: String,
+      email: String,
+      name: String,
+      photoURL: String
+    },
+    twitter: {
+      uid: String,
+      email: String,
+      name: String,
+      photoURL: String
+    }
+  }
 }, { timestamps: true });
 
 userSchema.pre('save', async function(next) {

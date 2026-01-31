@@ -9,6 +9,26 @@ export interface IUser {
   role: 'customer' | 'salon_owner' | 'admin';
   avatar?: string;
   isVerified: boolean;
+  socialAuth?: {
+    google?: {
+      uid: string;
+      email?: string;
+      name?: string;
+      photoURL?: string;
+    };
+    facebook?: {
+      uid: string;
+      email?: string;
+      name?: string;
+      photoURL?: string;
+    };
+    twitter?: {
+      uid: string;
+      email?: string;
+      name?: string;
+      photoURL?: string;
+    };
+  };
   createdAt?: Date;
   updatedAt?: Date;
 }

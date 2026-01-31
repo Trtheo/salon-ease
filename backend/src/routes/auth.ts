@@ -1,5 +1,5 @@
 import express from 'express';
-import { register, verifyRegistration, login, logout, getMe, forgotPassword, resetPassword, getTestOTP } from '../controllers/auth';
+import { register, verifyRegistration, login, logout, getMe, forgotPassword, verifyPasswordResetOTP, resetPassword, getTestOTP, socialLogin } from '../controllers/auth';
 import { protect } from '../middleware/auth';
 import { validateRegister, validateLogin, handleValidationErrors } from '../middleware/validation';
 
@@ -133,6 +133,45 @@ router.post('/login', validateLogin, handleValidationErrors, login);
 
 /**
  * @swagger
+ * /api/auth/social-login:
+ *   post:
+ *     summary: Social login (Google, Facebook, Twitter)
+ *     tags: [1. Customer - Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - provider
+ *               - uid
+ *             properties:
+ *               provider:
+ *                 type: string
+ *                 enum: [google, facebook, twitter]
+ *               uid:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               name:
+ *                 type: string
+ *               photoURL:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Social login successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AuthResponse'
+ *       400:
+ *         description: Invalid social login data
+ */
+router.post('/social-login', socialLogin);
+
+/**
+ * @swagger
  * /api/auth/logout:
  *   post:
  *     summary: Logout user
@@ -203,42 +242,8 @@ router.post('/logout', protect, logout);
  */
 router.post('/forgot-password', forgotPassword);
 
-/**
- * @swagger
- * /api/auth/reset-password:
- *   post:
- *     summary: Reset password with OTP
- *     tags: [1. Customer - Authentication]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - code
- *               - newPassword
- *               - method
- *             properties:
- *               method:
- *                 type: string
- *                 enum: [email, phone]
- *               email:
- *                 type: string
- *                 format: email
- *               phone:
- *                 type: string
- *               code:
- *                 type: string
- *               newPassword:
- *                 type: string
- *                 minLength: 6
- *     responses:
- *       200:
- *         description: Password reset successfully
- *       400:
- *         description: Invalid OTP
- */
+router.post('/verify-password-reset-otp', verifyPasswordResetOTP);
+
 router.post('/reset-password', resetPassword);
 
 /**
@@ -266,7 +271,6 @@ router.post('/reset-password', resetPassword);
  */
 router.get('/me', protect, getMe);
 
-export default router;
 /**
  * @swagger
  * /api/auth/test-otp:
@@ -289,3 +293,5 @@ export default router;
  *         description: Only available in development
  */
 router.get('/test-otp', getTestOTP);
+
+export default router;

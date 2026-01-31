@@ -2,8 +2,33 @@ import express from 'express';
 import { getSalons, getSalon, createSalon, updateSalon, deleteSalon } from '../controllers/salons';
 import { searchSalons, getSalonServices } from '../controllers/search';
 import { protect, authorize } from '../middleware/auth';
+import multer from 'multer';
+import path from 'path';
 
 const router = express.Router();
+
+// Multer configuration for salon images
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/salons/');
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, 'salon-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({ 
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed'));
+    }
+  }
+});
 
 /**
  * @swagger
@@ -83,9 +108,43 @@ const router = express.Router();
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
- *             $ref: '#/components/schemas/Salon'
+ *             type: object
+ *             required:
+ *               - name
+ *               - address
+ *               - phone
+ *               - email
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: Salon name
+ *               description:
+ *                 type: string
+ *                 description: Salon description
+ *               address:
+ *                 type: string
+ *                 description: Salon address
+ *               phone:
+ *                 type: string
+ *                 description: Contact phone number
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: Contact email
+ *               images:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   format: binary
+ *                 description: Salon images (max 5 files, 5MB each)
+ *               workingHours:
+ *                 type: string
+ *                 description: JSON string of working hours
+ *               services:
+ *                 type: string
+ *                 description: JSON array of service IDs
  *     responses:
  *       201:
  *         description: Salon created successfully
@@ -94,7 +153,7 @@ const router = express.Router();
  */
 router.route('/')
   .get(getSalons)
-  .post(protect, authorize('salon_owner', 'admin'), createSalon);
+  .post(protect, authorize('salon_owner', 'admin'), upload.array('images', 5), createSalon);
 
 /**
  * @swagger
@@ -176,9 +235,30 @@ router.route('/search')
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
- *             $ref: '#/components/schemas/Salon'
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               address:
+ *                 type: string
+ *               phone:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               images:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   format: binary
+ *               workingHours:
+ *                 type: string
+ *               services:
+ *                 type: string
  *     responses:
  *       200:
  *         description: Salon updated successfully
@@ -203,7 +283,7 @@ router.route('/search')
  */
 router.route('/:id')
   .get(getSalon)
-  .put(protect, authorize('salon_owner', 'admin'), updateSalon)
+  .put(protect, authorize('salon_owner', 'admin'), upload.array('images', 5), updateSalon)
   .delete(protect, authorize('salon_owner', 'admin'), deleteSalon);
 
 /**

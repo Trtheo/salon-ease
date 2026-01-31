@@ -18,13 +18,24 @@ export const register = async (req: Request, res: Response) => {
   try {
     const { name, email, password, phone, role } = req.body;
 
-    // Check if user already exists
-    const existingUser = await User.findOne({ $or: [{ email }, { phone }] });
-    if (existingUser) {
+    // Check email uniqueness
+    const existingEmailUser = await User.findOne({ email });
+    if (existingEmailUser) {
       return res.status(400).json({
         success: false,
-        error: 'User already exists with this email or phone'
+        error: 'Email already exists'
       });
+    }
+
+    // Check phone uniqueness if phone is provided
+    if (phone && phone.trim()) {
+      const existingPhoneUser = await User.findOne({ phone });
+      if (existingPhoneUser) {
+        return res.status(400).json({
+          success: false,
+          error: 'Phone already exists'
+        });
+      }
     }
 
     // Generate and send OTP to both email and SMS
@@ -80,24 +91,41 @@ export const verifyRegistration = async (req: Request, res: Response) => {
   try {
     const { name, email, password, phone, role, code } = req.body;
 
+    console.log('Verification attempt:', { email, code });
+
     // Verify OTP - check both phone and email
     const otp = await OTP.findOne({
-      $or: [
-        { phone, code, isUsed: false, expiresAt: { $gt: new Date() } },
-        { email, code, isUsed: false, expiresAt: { $gt: new Date() } }
-      ]
+      email,
+      code,
+      isUsed: false,
+      expiresAt: { $gt: new Date() }
     });
+
+    console.log('Found OTP:', otp ? { id: otp._id, code: otp.code, email: otp.email, isUsed: otp.isUsed, expiresAt: otp.expiresAt } : 'No OTP found');
 
     if (!otp) {
       // For development, allow a test code
       if (process.env.NODE_ENV === 'development' && code === '1234') {
         console.log('Using development test code');
       } else {
+        // Get all OTPs for this email for debugging
+        const allOTPs = await OTP.find({ email }).sort({ createdAt: -1 });
+        console.log('All OTPs for email:', allOTPs.map(o => ({ code: o.code, isUsed: o.isUsed, expiresAt: o.expiresAt, createdAt: o.createdAt })));
+        
         return res.status(400).json({
           success: false,
           error: 'Invalid or expired OTP'
         });
       }
+    }
+
+    // Check if user already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        error: 'User already exists with this email'
+      });
     }
 
     // Create user
@@ -110,10 +138,13 @@ export const verifyRegistration = async (req: Request, res: Response) => {
       isVerified: true
     });
 
+    console.log('User created successfully:', user._id);
+
     // Mark OTP as used if found
     if (otp) {
       otp.isUsed = true;
       await otp.save();
+      console.log('OTP marked as used');
     }
 
     const token = signToken(user._id);
@@ -145,6 +176,8 @@ export const forgotPassword = async (req: Request, res: Response) => {
   try {
     const { email, phone, method } = req.body;
     
+    console.log('Forgot password request:', { email, phone, method });
+    
     if (!method || !['email', 'phone'].includes(method)) {
       return res.status(400).json({
         success: false,
@@ -162,9 +195,7 @@ export const forgotPassword = async (req: Request, res: Response) => {
     }
 
     // Find user
-    const user = await User.findOne({
-      $or: [{ email: identifier }, { phone: identifier }]
-    });
+    const user = await User.findOne({ email: identifier });
 
     if (!user) {
       return res.status(404).json({
@@ -177,6 +208,8 @@ export const forgotPassword = async (req: Request, res: Response) => {
     const code = generateOTP();
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
+    console.log('Generated OTP for forgot password:', code);
+
     if (method === 'phone') {
       return res.status(400).json({
         success: false,
@@ -184,8 +217,14 @@ export const forgotPassword = async (req: Request, res: Response) => {
       });
     } else {
       await OTP.create({ email: identifier, code, expiresAt });
+      console.log(`Development OTP for ${identifier}: ${code}`);
+      
+      // For development, always return success even if email fails
       const sent = await sendOTPEmail(identifier, code);
-      if (!sent) {
+      console.log('Email sent result:', sent);
+      
+      // In development, continue even if email fails
+      if (!sent && process.env.NODE_ENV !== 'development') {
         return res.status(500).json({
           success: false,
           error: 'Failed to send OTP email'
@@ -198,6 +237,44 @@ export const forgotPassword = async (req: Request, res: Response) => {
       message: `OTP sent via ${method} for password reset`
     });
   } catch (error: any) {
+    console.error('Forgot password error:', error);
+    res.status(400).json({
+      success: false,
+      error: error.message
+    });
+  }
+};
+
+export const verifyPasswordResetOTP = async (req: Request, res: Response) => {
+  try {
+    const { email, phone, code, method } = req.body;
+    const identifier = method === 'email' ? email : phone;
+
+    console.log('Verifying password reset OTP:', { identifier, code, method });
+
+    // Verify OTP
+    const otp = await OTP.findOne({
+      email: identifier,
+      code,
+      isUsed: false,
+      expiresAt: { $gt: new Date() }
+    });
+
+    console.log('Found OTP for verification:', otp ? { id: otp._id, code: otp.code, isUsed: otp.isUsed } : 'No OTP found');
+
+    if (!otp) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid or expired OTP'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'OTP verified successfully'
+    });
+  } catch (error: any) {
+    console.error('Verify password reset OTP error:', error);
     res.status(400).json({
       success: false,
       error: error.message
@@ -210,13 +287,17 @@ export const resetPassword = async (req: Request, res: Response) => {
     const { email, phone, code, newPassword, method } = req.body;
     const identifier = method === 'email' ? email : phone;
 
+    console.log('Reset password attempt:', { identifier, code, method });
+
     // Verify OTP
     const otp = await OTP.findOne({
-      $or: [{ phone: identifier }, { email: identifier }],
+      email: identifier,
       code,
       isUsed: false,
       expiresAt: { $gt: new Date() }
     });
+
+    console.log('Found OTP:', otp ? { id: otp._id, code: otp.code, isUsed: otp.isUsed } : 'No OTP found');
 
     if (!otp) {
       return res.status(400).json({
@@ -226,9 +307,7 @@ export const resetPassword = async (req: Request, res: Response) => {
     }
 
     // Find and update user password
-    const user = await User.findOne({
-      $or: [{ email: identifier }, { phone: identifier }]
-    });
+    const user = await User.findOne({ email: identifier });
 
     if (!user) {
       return res.status(404).json({
@@ -244,11 +323,14 @@ export const resetPassword = async (req: Request, res: Response) => {
     otp.isUsed = true;
     await otp.save();
 
+    console.log('Password reset successful for:', identifier);
+
     res.status(200).json({
       success: true,
       message: 'Password reset successfully'
     });
   } catch (error: any) {
+    console.error('Reset password error:', error);
     res.status(400).json({
       success: false,
       error: error.message
@@ -351,6 +433,74 @@ export const getMe = async (req: any, res: Response) => {
     });
   }
 };
+export const socialLogin = async (req: Request, res: Response) => {
+  try {
+    const { provider, uid, email, name, photoURL } = req.body;
+
+    if (!provider || !uid) {
+      return res.status(400).json({
+        success: false,
+        error: 'Provider and UID are required'
+      });
+    }
+
+    // Check if user already exists with this social provider
+    let user = await User.findOne({ 
+      $or: [
+        { [`socialAuth.${provider}.uid`]: uid },
+        { email: email }
+      ]
+    });
+
+    if (user) {
+      // Update social auth info if not already set
+      if (!user.socialAuth) {
+        user.socialAuth = {};
+      }
+      if (!user.socialAuth[provider]) {
+        user.socialAuth[provider] = { uid, email, name, photoURL };
+        await user.save();
+      }
+    } else {
+      // Create new user
+      user = await User.create({
+        name: name || 'Social User',
+        email: email || `${provider}_${uid}@social.local`,
+        password: Math.random().toString(36).slice(-8), // Random password
+        role: 'customer',
+        isVerified: true,
+        socialAuth: {
+          [provider]: { uid, email, name, photoURL }
+        }
+      });
+    }
+
+    const token = signToken(user._id);
+
+    res.status(200).json({
+      success: true,
+      token,
+      data: {
+        user: {
+          id: user._id,
+          userId: user.userId,
+          name: user.name,
+          email: user.email,
+          phone: user.phone,
+          role: user.role,
+          isVerified: user.isVerified
+        }
+      }
+    });
+  } catch (error: any) {
+    console.error('Social login error:', error);
+    res.status(400).json({
+      success: false,
+      error: error.message
+    });
+  }
+};
+
 export const getTestOTP = async (req: Request, res: Response) => {
   try {
     if (process.env.NODE_ENV !== 'development') {
