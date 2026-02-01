@@ -3,9 +3,9 @@ import { useAuth } from '../contexts/AuthContext';
 import { serviceService, salonOwnerService } from '../services/api';
 import { Service, Salon } from '../types';
 import { Plus, Edit, Trash2, Clock, DollarSign, Tag, Search, Eye } from 'lucide-react';
-import toast from 'react-hot-toast';
 import ServiceModal from '../components/ServiceModal';
 import ServiceViewModal from '../components/ServiceViewModal';
+import MessageModal from '../components/MessageModal';
 
 interface ServiceFormData {
   name: string;
@@ -28,6 +28,8 @@ const ServicesPage: React.FC = () => {
   const [viewingService, setViewingService] = useState<Service | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
+  const [messageModal, setMessageModal] = useState({ isOpen: false, type: 'success' as 'success' | 'error', title: '', message: '' });
+  const [confirmDelete, setConfirmDelete] = useState({ isOpen: false, serviceId: '', serviceName: '' });
 
   useEffect(() => {
     fetchData();
@@ -57,16 +59,23 @@ const ServicesPage: React.FC = () => {
     // Keeping for compatibility
   };
 
-  const handleDelete = async (id: string) => {
-    if (window.confirm('Are you sure you want to delete this service?')) {
-      try {
-        await serviceService.deleteService(id);
-        toast.success('Service deleted successfully');
-        fetchData();
-      } catch (error) {
-        toast.error('Failed to delete service');
-      }
+  const showMessage = (type: 'success' | 'error', title: string, message: string) => {
+    setMessageModal({ isOpen: true, type, title, message });
+  };
+
+  const handleDelete = async (serviceId: string) => {
+    try {
+      await serviceService.deleteService(serviceId);
+      showMessage('success', 'Success', 'Service deleted successfully');
+      setConfirmDelete({ isOpen: false, serviceId: '', serviceName: '' });
+      fetchData();
+    } catch (error) {
+      showMessage('error', 'Error', 'Failed to delete service');
     }
+  };
+
+  const confirmDeleteService = (serviceId: string, serviceName: string) => {
+    setConfirmDelete({ isOpen: true, serviceId, serviceName });
   };
 
   const handleView = (service: Service) => {
@@ -200,7 +209,7 @@ const ServicesPage: React.FC = () => {
                 <span>Edit</span>
               </button>
               <button
-                onClick={() => handleDelete(service._id)}
+                onClick={() => confirmDeleteService(service._id, service.name)}
                 className="flex-1 bg-red-100 text-red-700 px-3 py-2 rounded-lg hover:bg-red-200 flex items-center justify-center space-x-1"
               >
                 <Trash2 className="h-4 w-4" />
@@ -226,7 +235,11 @@ const ServicesPage: React.FC = () => {
           setShowModal(false);
           setEditingService(null);
         }}
-        onSuccess={fetchData}
+        onSuccess={() => {
+          showMessage('success', 'Success', editingService ? 'Service updated successfully' : 'Service created successfully');
+          fetchData();
+        }}
+        onError={(message) => showMessage('error', 'Error', message)}
         service={editingService}
         salons={salons}
       />
@@ -239,6 +252,41 @@ const ServicesPage: React.FC = () => {
           setViewingService(null);
         }}
         service={viewingService}
+      />
+
+      {/* Delete Confirmation Modal */}
+      {confirmDelete.isOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+            <h2 className="text-xl font-bold text-red-900 mb-4">Delete Service</h2>
+            <p className="text-gray-700 mb-6">
+              Are you sure you want to delete <strong>{confirmDelete.serviceName}</strong>? This action cannot be undone.
+            </p>
+            <div className="flex space-x-3">
+              <button
+                onClick={() => setConfirmDelete({ isOpen: false, serviceId: '', serviceName: '' })}
+                className="flex-1 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleDelete(confirmDelete.serviceId)}
+                className="flex-1 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Message Modal */}
+      <MessageModal
+        isOpen={messageModal.isOpen}
+        onClose={() => setMessageModal({ ...messageModal, isOpen: false })}
+        type={messageModal.type}
+        title={messageModal.title}
+        message={messageModal.message}
       />
     </div>
   );

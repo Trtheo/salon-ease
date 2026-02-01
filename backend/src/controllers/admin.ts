@@ -53,8 +53,17 @@ export const getSalonOwners = async (req: AuthRequest, res: Response) => {
 // Update user role
 export const updateUserRole = async (req: AuthRequest, res: Response) => {
   try {
-    const { userId } = (req as any).params;
-    const { role } = (req as any).body;
+    const { userId } = req.params;
+    const { role } = req.body;
+
+    console.log('Update user role - userId:', userId, 'role:', role);
+
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        error: 'User ID is required'
+      });
+    }
 
     const user = await User.findByIdAndUpdate(
       userId,
@@ -74,6 +83,7 @@ export const updateUserRole = async (req: AuthRequest, res: Response) => {
       data: user
     });
   } catch (error: any) {
+    console.error('Update user role error:', error);
     res.status(400).json({
       success: false,
       error: error.message

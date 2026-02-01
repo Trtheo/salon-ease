@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Eye, EyeOff, Mail, Lock, Scissors } from 'lucide-react';
 
@@ -170,6 +170,12 @@ const LoginPage: React.FC = () => {
                 'Sign in'
               )}
             </button>
+          </div>
+
+          <div className="text-center">
+            <Link to="/forgot-password" className="text-sm text-primary-600 hover:text-primary-500">
+              Forgot your password?
+            </Link>
           </div>
 
           <div className="text-center">

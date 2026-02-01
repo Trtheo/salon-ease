@@ -57,11 +57,31 @@ export const authService = {
     const response = await api.post('/auth/logout');
     return response.data;
   },
+
+  forgotPassword: async (email: string): Promise<ApiResponse> => {
+    const response = await api.post('/auth/forgot-password', { email, method: 'email' });
+    return response.data;
+  },
+
+  verifyPasswordResetOTP: async (email: string, code: string): Promise<ApiResponse> => {
+    const response = await api.post('/auth/verify-password-reset-otp', { email, code, method: 'email' });
+    return response.data;
+  },
+
+  resetPassword: async (email: string, code: string, newPassword: string): Promise<ApiResponse> => {
+    const response = await api.post('/auth/reset-password', { email, code, newPassword, method: 'email' });
+    return response.data;
+  },
 };
 
 export const salonOwnerService = {
   getMySalons: async (page: number = 1, limit: number = 10): Promise<ApiResponse<Salon[]>> => {
     const response = await api.get(`/salon-owner/salons?page=${page}&limit=${limit}`);
+    return response.data;
+  },
+
+  getMySalonById: async (salonId: string): Promise<ApiResponse<Salon>> => {
+    const response = await api.get(`/salon-owner/salons/${salonId}`);
     return response.data;
   },
 
@@ -91,13 +111,17 @@ export const salonOwnerService = {
   },
 
   updateSalon: async (salonId: string, salonData: any): Promise<ApiResponse<Salon>> => {
-    const response = await api.put(`/salon-owner/salons/${salonId}`, salonData);
+    console.log('API: Updating salon', salonId, 'with data:', salonData);
+    const response = await api.put(`/salon-owner/salons/${salonId}`, salonData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    console.log('API: Update response:', response.data);
     return response.data;
   },
 
   createSalon: async (salonData: FormData): Promise<ApiResponse<Salon>> => {
     const response = await api.post('/salon-owner/salons', salonData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
+      headers: { 'Content-Type': 'multipart/form-data' }
     });
     return response.data;
   },

@@ -3,9 +3,9 @@ import { useAuth } from '../contexts/AuthContext';
 import { adminService } from '../services/api';
 import { User } from '../types';
 import { Users, Search, Edit, Trash2, UserCheck, Shield, Crown } from 'lucide-react';
-import toast from 'react-hot-toast';
 import { format } from 'date-fns';
 import Pagination from '../components/Pagination';
+import MessageModal from '../components/MessageModal';
 
 const UsersPage: React.FC = () => {
   const { user } = useAuth();
@@ -19,6 +19,8 @@ const UsersPage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
+  const [messageModal, setMessageModal] = useState({ isOpen: false, type: 'success' as 'success' | 'error', title: '', message: '' });
+  const [confirmDelete, setConfirmDelete] = useState({ isOpen: false, userId: '', userName: '' });
   const itemsPerPage = 10;
 
   useEffect(() => {
@@ -37,7 +39,7 @@ const UsersPage: React.FC = () => {
         setTotalItems(response.total || 0);
       }
     } catch (error) {
-      toast.error('Failed to fetch users');
+      showMessage('error', 'Error', 'Failed to fetch users');
     } finally {
       setLoading(false);
     }
@@ -47,31 +49,39 @@ const UsersPage: React.FC = () => {
     if (!editingUser || !newRole) return;
     
     try {
-      const response = await adminService.updateUserRole(editingUser.id, newRole);
+      const response = await adminService.updateUserRole((editingUser as any)._id || editingUser.id, newRole);
       if (response.success) {
-        toast.success('User role updated successfully');
+        showMessage('success', 'Success', 'User role updated successfully');
         setShowEditModal(false);
         setEditingUser(null);
         fetchUsers(currentPage);
       }
-    } catch (error) {
-      toast.error('Failed to update user role');
+    } catch (error: any) {
+      showMessage('error', 'Error', error.response?.data?.error || 'Failed to update user role');
     }
+  };
+
+  const showMessage = (type: 'success' | 'error', title: string, message: string) => {
+    setMessageModal({ isOpen: true, type, title, message });
   };
 
   const handleDeleteUser = async (userId: string) => {
-    if (window.confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
-      try {
-        await adminService.deleteUser(userId);
-        toast.success('User deleted successfully');
-        fetchUsers(currentPage);
-      } catch (error) {
-        toast.error('Failed to delete user');
-      }
+    try {
+      await adminService.deleteUser(userId);
+      showMessage('success', 'Success', 'User deleted successfully');
+      setConfirmDelete({ isOpen: false, userId: '', userName: '' });
+      fetchUsers(currentPage);
+    } catch (error: any) {
+      showMessage('error', 'Error', error.response?.data?.error || 'Failed to delete user');
     }
   };
 
+  const confirmDeleteUser = (userId: string, userName: string) => {
+    setConfirmDelete({ isOpen: true, userId, userName });
+  };
+
   const openEditModal = (userToEdit: User) => {
+    console.log('Opening edit modal for user:', userToEdit);
     setEditingUser(userToEdit);
     setNewRole(userToEdit.role);
     setShowEditModal(true);
@@ -236,7 +246,7 @@ const UsersPage: React.FC = () => {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {filteredUsers.map((u) => (
-                <tr key={u.id} className="hover:bg-gray-50">
+                <tr key={(u as any)._id || u.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="h-10 w-10 bg-gray-200 rounded-full flex items-center justify-center">
@@ -278,15 +288,13 @@ const UsersPage: React.FC = () => {
                         <Edit className="h-4 w-4" />
                         <span>Edit</span>
                       </button>
-                      {u.id !== user.id && (
-                        <button
-                          onClick={() => handleDeleteUser(u.id)}
-                          className="text-red-600 hover:text-red-900 flex items-center space-x-1"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                          <span>Delete</span>
-                        </button>
-                      )}
+                      <button
+                        onClick={() => confirmDeleteUser((u as any)._id || u.id, u.name)}
+                        className="text-red-600 hover:text-red-900 flex items-center space-x-1"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        <span>Delete</span>
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -373,6 +381,49 @@ const UsersPage: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Delete Confirmation Modal */}
+      <MessageModal
+        isOpen={confirmDelete.isOpen}
+        onClose={() => setConfirmDelete({ isOpen: false, userId: '', userName: '' })}
+        type="error"
+        title="Delete User"
+        message={`Are you sure you want to delete ${confirmDelete.userName}? This action cannot be undone.`}
+      />
+      
+      {confirmDelete.isOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+            <h2 className="text-xl font-bold text-red-900 mb-4">Delete User</h2>
+            <p className="text-gray-700 mb-6">
+              Are you sure you want to delete <strong>{confirmDelete.userName}</strong>? This action cannot be undone.
+            </p>
+            <div className="flex space-x-3">
+              <button
+                onClick={() => setConfirmDelete({ isOpen: false, userId: '', userName: '' })}
+                className="flex-1 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleDeleteUser(confirmDelete.userId)}
+                className="flex-1 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Message Modal */}
+      <MessageModal
+        isOpen={messageModal.isOpen}
+        onClose={() => setMessageModal({ ...messageModal, isOpen: false })}
+        type={messageModal.type}
+        title={messageModal.title}
+        message={messageModal.message}
+      />
     </div>
   );
 };

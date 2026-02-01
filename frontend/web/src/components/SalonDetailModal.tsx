@@ -54,9 +54,13 @@ const SalonDetailModal: React.FC<SalonDetailModalProps> = ({ salon, isOpen, onCl
                 {salon.images.map((image, index) => (
                   <img
                     key={index}
-                    src={image}
+                    src={`http://127.0.0.1:3002${image}`}
                     alt={`${salon.name} ${index + 1}`}
                     className="w-full h-48 object-cover rounded-lg"
+                    onError={(e) => {
+                      console.log('Image failed to load:', image);
+                      (e.target as HTMLImageElement).style.display = 'none';
+                    }}
                   />
                 ))}
               </div>

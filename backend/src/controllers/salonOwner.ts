@@ -291,14 +291,13 @@ export const getOwnerOverview = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Update salon (salon owner)
-export const updateMySalon = async (req: AuthRequest, res: Response) => {
+export const getMySalonById = async (req: AuthRequest, res: Response) => {
   try {
     const { salonId } = req.params;
-    const updateData = req.body;
-
-    // Verify salon ownership
-    const salon = await Salon.findOne({ _id: salonId, owner: req.user.id });
+    
+    const salon = await Salon.findOne({ _id: salonId, owner: req.user.id })
+      .populate('services');
+    
     if (!salon) {
       return res.status(404).json({
         success: false,
@@ -306,17 +305,89 @@ export const updateMySalon = async (req: AuthRequest, res: Response) => {
       });
     }
 
+    res.status(200).json({
+      success: true,
+      data: salon
+    });
+  } catch (error: any) {
+    res.status(400).json({
+      success: false,
+      error: error.message
+    });
+  }
+};
+
+// Update salon (salon owner)
+export const updateMySalon = async (req: any, res: Response) => {
+  try {
+    const { salonId } = req.params;
+    const files = req.files as any[];
+
+    console.log('=== UPDATE SALON REQUEST ===');
+    console.log('Salon ID:', salonId);
+    console.log('Files received:', files?.length || 0);
+    console.log('Body keys:', Object.keys(req.body));
+    console.log('Request body:', req.body);
+    
+    if (files && files.length > 0) {
+      console.log('File details:', files.map(f => ({ filename: f.filename, size: f.size, mimetype: f.mimetype })));
+    }
+
+    // Verify salon ownership
+    const salon = await Salon.findOne({ _id: salonId, owner: req.user.id });
+    if (!salon) {
+      console.log('Salon not found or not authorized');
+      return res.status(404).json({
+        success: false,
+        error: 'Salon not found or not authorized'
+      });
+    }
+
+    console.log('Current salon images:', salon.images);
+
+    // Prepare update data - exclude problematic fields
+    const updateData: any = {
+      name: req.body.name,
+      description: req.body.description,
+      address: req.body.address,
+      phone: req.body.phone,
+      email: req.body.email
+    };
+
+    // Parse working hours if it's a string
+    if (req.body.workingHours && typeof req.body.workingHours === 'string') {
+      try {
+        updateData.workingHours = JSON.parse(req.body.workingHours);
+      } catch (e) {
+        console.error('Failed to parse working hours:', req.body.workingHours);
+      }
+    }
+
+    // Handle new images only
+    if (files && files.length > 0) {
+      const imagePaths = files.map((file: any) => `/uploads/salons/${file.filename}`);
+      console.log('New image paths:', imagePaths);
+      updateData.images = [...(salon.images || []), ...imagePaths];
+      console.log('Combined images:', updateData.images);
+    }
+
+    console.log('Final update data:', updateData);
+
     const updatedSalon = await Salon.findByIdAndUpdate(
       salonId,
       updateData,
       { new: true, runValidators: true }
     ).populate('services');
 
+    console.log('Updated salon images:', updatedSalon?.images);
+    console.log('=== UPDATE COMPLETE ===');
+
     res.status(200).json({
       success: true,
       data: updatedSalon
     });
   } catch (error: any) {
+    console.error('Update salon error:', error);
     res.status(400).json({
       success: false,
       error: error.message

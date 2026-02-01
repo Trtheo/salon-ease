@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Upload, Trash2 } from 'lucide-react';
+import { X, Upload, Trash2, Plus } from 'lucide-react';
 import { Salon } from '../types';
 import { adminService, salonOwnerService } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
@@ -15,6 +15,8 @@ interface EditSalonModalProps {
 const EditSalonModal: React.FC<EditSalonModalProps> = ({ salon, isOpen, onClose, onSuccess, onError }) => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [images, setImages] = useState<File[]>([]);
+  const [existingImages, setExistingImages] = useState<string[]>([]);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -50,6 +52,7 @@ const EditSalonModal: React.FC<EditSalonModalProps> = ({ salon, isOpen, onClose,
           sunday: { open: '10:00', close: '16:00', isOpen: false }
         }
       });
+      setExistingImages(salon.images || []);
     }
   }, [salon]);
 
@@ -59,9 +62,28 @@ const EditSalonModal: React.FC<EditSalonModalProps> = ({ salon, isOpen, onClose,
 
     setLoading(true);
     try {
+      console.log('Submitting salon update for:', salon._id);
+      console.log('Images to upload:', images.length);
+      
+      const submitData = new FormData();
+      submitData.append('name', formData.name);
+      submitData.append('description', formData.description);
+      submitData.append('address', formData.address);
+      submitData.append('phone', formData.phone);
+      submitData.append('email', formData.email);
+      submitData.append('workingHours', JSON.stringify(formData.workingHours));
+      
+      // Only add new images
+      images.forEach((image) => {
+        submitData.append('images', image);
+      });
+      
+      console.log('Making API call...');
       const response = user?.role === 'admin' 
-        ? await adminService.updateSalon(salon._id, formData)
-        : await salonOwnerService.updateSalon(salon._id, formData);
+        ? await adminService.updateSalon(salon._id, submitData)
+        : await salonOwnerService.updateSalon(salon._id, submitData);
+      
+      console.log('API response:', response);
       
       if (response.success) {
         onSuccess();
@@ -70,6 +92,7 @@ const EditSalonModal: React.FC<EditSalonModalProps> = ({ salon, isOpen, onClose,
         onError(response.error || 'Failed to update salon');
       }
     } catch (error: any) {
+      console.error('Update salon error:', error);
       onError(error.response?.data?.error || 'Failed to update salon');
     } finally {
       setLoading(false);
@@ -141,6 +164,91 @@ const EditSalonModal: React.FC<EditSalonModalProps> = ({ salon, isOpen, onClose,
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500"
               />
             </div>
+          </div>
+
+          {/* Images */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-3">
+              Salon Images
+            </label>
+            
+            {/* Existing Images */}
+            {existingImages.length > 0 && (
+              <div className="mb-4">
+                <p className="text-sm text-gray-600 mb-2">Current Images:</p>
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                  {existingImages.map((image, index) => (
+                    <div key={index} className="relative">
+                      <img
+                        src={`http://127.0.0.1:3002${image}`}
+                        alt={`Salon ${index + 1}`}
+                        className="w-full h-24 object-cover rounded-lg"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setExistingImages(existingImages.filter((_, i) => i !== index))}
+                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {/* New Images */}
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+              <Upload className="h-6 w-6 text-gray-400 mx-auto mb-2" />
+              <p className="text-sm text-gray-600 mb-2">Add new images (max 5 total)</p>
+              <input
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={(e) => {
+                  const files = Array.from(e.target.files || []);
+                  if (existingImages.length + images.length + files.length > 5) {
+                    alert('Maximum 5 images allowed');
+                    return;
+                  }
+                  setImages([...images, ...files]);
+                }}
+                className="hidden"
+                id="new-images"
+              />
+              <label
+                htmlFor="new-images"
+                className="bg-primary-100 text-primary-700 px-3 py-2 rounded-lg hover:bg-primary-200 cursor-pointer inline-flex items-center space-x-2"
+              >
+                <Plus className="h-4 w-4" />
+                <span>Add Images</span>
+              </label>
+            </div>
+            
+            {/* New Image Previews */}
+            {images.length > 0 && (
+              <div className="mt-4">
+                <p className="text-sm text-gray-600 mb-2">New Images:</p>
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                  {images.map((image, index) => (
+                    <div key={index} className="relative">
+                      <img
+                        src={URL.createObjectURL(image)}
+                        alt={`New ${index + 1}`}
+                        className="w-full h-24 object-cover rounded-lg"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setImages(images.filter((_, i) => i !== index))}
+                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           <div>

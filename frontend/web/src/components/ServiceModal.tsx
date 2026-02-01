@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { X, DollarSign, Clock, Tag, Save } from 'lucide-react';
 import { serviceService } from '../services/api';
 import { Service, Salon } from '../types';
-import toast from 'react-hot-toast';
 
 interface ServiceModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  onError: (message: string) => void;
   service?: Service | null;
   salons: Salon[];
 }
@@ -16,6 +16,7 @@ const ServiceModal: React.FC<ServiceModalProps> = ({
   isOpen, 
   onClose, 
   onSuccess, 
+  onError,
   service, 
   salons 
 }) => {
@@ -79,18 +80,22 @@ const ServiceModal: React.FC<ServiceModalProps> = ({
       if (service) {
         const response = await serviceService.updateService(service._id, formData);
         if (response.success) {
-          toast.success('Service updated successfully');
+          onSuccess();
+          onClose();
+        } else {
+          onError(response.error || 'Failed to update service');
         }
       } else {
         const response = await serviceService.createService(formData);
         if (response.success) {
-          toast.success('Service created successfully');
+          onSuccess();
+          onClose();
+        } else {
+          onError(response.error || 'Failed to create service');
         }
       }
-      onSuccess();
-      onClose();
-    } catch (error) {
-      toast.error(`Failed to ${service ? 'update' : 'create'} service`);
+    } catch (error: any) {
+      onError(error.response?.data?.error || `Failed to ${service ? 'update' : 'create'} service`);
     } finally {
       setLoading(false);
     }

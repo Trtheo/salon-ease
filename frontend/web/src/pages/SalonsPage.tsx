@@ -43,6 +43,7 @@ const SalonsPage: React.FC = () => {
         setTotalPages(response.pages || 1);
         setTotalItems(response.total || 0);
         console.log('Salons loaded:', response.data?.length || 0, 'Total:', response.total);
+        console.log('First salon data:', response.data?.[0]);
       } else {
         console.error('Salons API error:', response.error);
         showMessage('error', 'Error', 'Failed to fetch salons');
@@ -149,9 +150,13 @@ const SalonsPage: React.FC = () => {
             <div className="h-48 bg-gray-200 relative">
               {salon.images && salon.images.length > 0 ? (
                 <img
-                  src={salon.images[0]}
+                  src={`http://127.0.0.1:3002${salon.images[0]}`}
                   alt={salon.name}
                   className="w-full h-full object-cover"
+                  onError={(e) => {
+                    console.log('Image failed to load:', salon.images[0]);
+                    (e.target as HTMLImageElement).style.display = 'none';
+                  }}
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
