@@ -5,13 +5,26 @@ import Booking from '../models/Booking';
 import Service from '../models/Service';
 import mongoose from 'mongoose';
 
-// Get salon owner's salons
+// Get salon owner's salons with pagination
 export const getMySalons = async (req: AuthRequest, res: Response) => {
   try {
-    const salons = await Salon.find({ owner: req.user.id }).populate('services');
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const skip = (page - 1) * limit;
+
+    const total = await Salon.countDocuments({ owner: req.user.id });
+    const salons = await Salon.find({ owner: req.user.id })
+      .populate('services')
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 });
+
     res.status(200).json({
       success: true,
       count: salons.length,
+      total,
+      page,
+      pages: Math.ceil(total / limit),
       data: salons
     });
   } catch (error: any) {
@@ -269,6 +282,39 @@ export const getOwnerOverview = async (req: AuthRequest, res: Response) => {
           isVerified: salon.isVerified
         }))
       }
+    });
+  } catch (error: any) {
+    res.status(400).json({
+      success: false,
+      error: error.message
+    });
+  }
+};
+
+// Update salon (salon owner)
+export const updateMySalon = async (req: AuthRequest, res: Response) => {
+  try {
+    const { salonId } = req.params;
+    const updateData = req.body;
+
+    // Verify salon ownership
+    const salon = await Salon.findOne({ _id: salonId, owner: req.user.id });
+    if (!salon) {
+      return res.status(404).json({
+        success: false,
+        error: 'Salon not found or not authorized'
+      });
+    }
+
+    const updatedSalon = await Salon.findByIdAndUpdate(
+      salonId,
+      updateData,
+      { new: true, runValidators: true }
+    ).populate('services');
+
+    res.status(200).json({
+      success: true,
+      data: updatedSalon
     });
   } catch (error: any) {
     res.status(400).json({

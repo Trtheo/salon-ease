@@ -548,3 +548,192 @@ export const getTestOTP = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const updateProfile = async (req: any, res: Response) => {
+  try {
+    const { name, phone } = req.body;
+    const userId = req.user.id;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: 'User not found'
+      });
+    }
+
+    if (name) user.name = name;
+    if (phone) user.phone = phone;
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      data: {
+        user: {
+          id: user._id,
+          userId: user.userId,
+          name: user.name,
+          email: user.email,
+          phone: user.phone,
+          role: user.role,
+          isVerified: user.isVerified
+        }
+      }
+    });
+  } catch (error: any) {
+    res.status(400).json({
+      success: false,
+      error: error.message
+    });
+  }
+};
+
+export const changePassword = async (req: any, res: Response) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    const userId = req.user.id;
+
+    const user = await User.findById(userId).select('+password');
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: 'User not found'
+      });
+    }
+
+    const isCurrentPasswordValid = await user.comparePassword(currentPassword);
+    if (!isCurrentPasswordValid) {
+      return res.status(400).json({
+        success: false,
+        error: 'Current password is incorrect'
+      });
+    }
+
+    user.password = newPassword;
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Password changed successfully'
+    });
+  } catch (error: any) {
+    res.status(400).json({
+      success: false,
+      error: error.message
+    });
+  }
+};
+
+export const getNotificationSettings = async (req: any, res: Response) => {
+  try {
+    const userId = req.user.id;
+    const user = await User.findById(userId);
+    
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: 'User not found'
+      });
+    }
+
+    const settings = user.notificationSettings || {
+      emailBookings: true,
+      emailPromotions: false,
+      smsReminders: true,
+      pushNotifications: true
+    };
+
+    res.status(200).json({
+      success: true,
+      data: settings
+    });
+  } catch (error: any) {
+    res.status(400).json({
+      success: false,
+      error: error.message
+    });
+  }
+};
+
+export const updateNotificationSettings = async (req: any, res: Response) => {
+  try {
+    const { emailBookings, emailPromotions, smsReminders, pushNotifications } = req.body;
+    const userId = req.user.id;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: 'User not found'
+      });
+    }
+
+    user.notificationSettings = {
+      emailBookings: emailBookings !== undefined ? emailBookings : true,
+      emailPromotions: emailPromotions !== undefined ? emailPromotions : false,
+      smsReminders: smsReminders !== undefined ? smsReminders : true,
+      pushNotifications: pushNotifications !== undefined ? pushNotifications : true
+    };
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      data: user.notificationSettings
+    });
+  } catch (error: any) {
+    res.status(400).json({
+      success: false,
+      error: error.message
+    });
+  }
+};
+
+export const uploadAvatar = async (req: any, res: Response) => {
+  try {
+    const userId = req.user.id;
+    const file = req.file;
+
+    if (!file) {
+      return res.status(400).json({
+        success: false,
+        error: 'No file uploaded'
+      });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: 'User not found'
+      });
+    }
+
+    // Store the file path as avatar
+    user.avatar = `/uploads/avatars/${file.filename}`;
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      data: {
+        avatar: user.avatar,
+        user: {
+          id: user._id,
+          userId: user.userId,
+          name: user.name,
+          email: user.email,
+          phone: user.phone,
+          role: user.role,
+          isVerified: user.isVerified,
+          avatar: user.avatar
+        }
+      }
+    });
+  } catch (error: any) {
+    res.status(400).json({
+      success: false,
+      error: error.message
+    });
+  }
+};

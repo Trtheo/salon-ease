@@ -5,7 +5,8 @@ import {
   updateBookingStatus,
   getSalonStats,
   getSalonAnalytics,
-  getOwnerOverview
+  getOwnerOverview,
+  updateMySalon
 } from '../controllers/salonOwner';
 import { createSalon } from '../controllers/salons';
 import { protect, authorize } from '../middleware/auth';
@@ -45,13 +46,26 @@ router.use(authorize('salon_owner'));
  * @swagger
  * /api/salon-owner/salons:
  *   get:
- *     summary: Get my salons (Salon Owner only)
+ *     summary: Get my salons with pagination (Salon Owner only)
  *     tags: [14. Salon Owner - Booking Management]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Number of items per page
  *     responses:
  *       200:
- *         description: List of owner's salons
+ *         description: Paginated list of owner's salons
  *         content:
  *           application/json:
  *             schema:
@@ -61,6 +75,12 @@ router.use(authorize('salon_owner'));
  *                   type: boolean
  *                 count:
  *                   type: number
+ *                 total:
+ *                   type: integer
+ *                 page:
+ *                   type: integer
+ *                 pages:
+ *                   type: integer
  *                 data:
  *                   type: array
  *                   items:
@@ -267,6 +287,45 @@ router.get('/overview', getOwnerOverview);
  *         description: Detailed salon analytics
  */
 router.get('/salons/:salonId/analytics', getSalonAnalytics);
+
+/**
+ * @swagger
+ * /api/salon-owner/salons/{salonId}:
+ *   put:
+ *     summary: Update my salon (Salon Owner only)
+ *     tags: [11. Salon Owner - Salon Setup]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: salonId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               address:
+ *                 type: string
+ *               phone:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               workingHours:
+ *                 type: object
+ *     responses:
+ *       200:
+ *         description: Salon updated successfully
+ */
+router.put('/salons/:salonId', updateMySalon);
 
 router.put('/bookings/:bookingId/status', updateBookingStatus);
 

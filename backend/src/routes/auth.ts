@@ -1,9 +1,34 @@
 import express from 'express';
-import { register, verifyRegistration, login, logout, getMe, forgotPassword, verifyPasswordResetOTP, resetPassword, getTestOTP, socialLogin } from '../controllers/auth';
+import multer from 'multer';
+import path from 'path';
+import { register, verifyRegistration, login, logout, getMe, forgotPassword, verifyPasswordResetOTP, resetPassword, getTestOTP, socialLogin, updateProfile, changePassword, getNotificationSettings, updateNotificationSettings, uploadAvatar } from '../controllers/auth';
 import { protect } from '../middleware/auth';
 import { validateRegister, validateLogin, handleValidationErrors } from '../middleware/validation';
 
 const router = express.Router();
+
+// Multer configuration for avatar uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/avatars/');
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, 'avatar-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({ 
+  storage,
+  limits: { fileSize: 2 * 1024 * 1024 }, // 2MB limit
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed'));
+    }
+  }
+});
 
 /**
  * @swagger
@@ -270,6 +295,134 @@ router.post('/reset-password', resetPassword);
  *         description: Unauthorized
  */
 router.get('/me', protect, getMe);
+
+/**
+ * @swagger
+ * /api/auth/profile:
+ *   put:
+ *     summary: Update user profile
+ *     tags: [1. Customer - Authentication]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               phone:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Profile updated successfully
+ *       404:
+ *         description: User not found
+ */
+router.put('/profile', protect, updateProfile);
+
+/**
+ * @swagger
+ * /api/auth/change-password:
+ *   put:
+ *     summary: Change user password
+ *     tags: [1. Customer - Authentication]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - currentPassword
+ *               - newPassword
+ *             properties:
+ *               currentPassword:
+ *                 type: string
+ *               newPassword:
+ *                 type: string
+ *                 minLength: 6
+ *     responses:
+ *       200:
+ *         description: Password changed successfully
+ *       400:
+ *         description: Current password is incorrect
+ */
+router.put('/change-password', protect, changePassword);
+
+/**
+ * @swagger
+ * /api/auth/notification-settings:
+ *   get:
+ *     summary: Get notification settings
+ *     tags: [1. Customer - Authentication]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Notification settings retrieved
+ */
+router.get('/notification-settings', protect, getNotificationSettings);
+
+/**
+ * @swagger
+ * /api/auth/notification-settings:
+ *   put:
+ *     summary: Update notification settings
+ *     tags: [1. Customer - Authentication]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               emailBookings:
+ *                 type: boolean
+ *               emailPromotions:
+ *                 type: boolean
+ *               smsReminders:
+ *                 type: boolean
+ *               pushNotifications:
+ *                 type: boolean
+ *     responses:
+ *       200:
+ *         description: Notification settings updated
+ */
+router.put('/notification-settings', protect, updateNotificationSettings);
+
+/**
+ * @swagger
+ * /api/auth/upload-avatar:
+ *   post:
+ *     summary: Upload user avatar
+ *     tags: [1. Customer - Authentication]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               avatar:
+ *                 type: string
+ *                 format: binary
+ *                 description: Avatar image file (max 2MB)
+ *     responses:
+ *       200:
+ *         description: Avatar uploaded successfully
+ *       400:
+ *         description: No file uploaded or invalid file type
+ */
+router.post('/upload-avatar', protect, upload.single('avatar'), uploadAvatar);
 
 /**
  * @swagger

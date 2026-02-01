@@ -16,6 +16,12 @@ const userSchema = new Schema<IUserDocument>({
   role: { type: String, enum: ['customer', 'salon_owner', 'admin'], default: 'customer' },
   avatar: { type: String },
   isVerified: { type: Boolean, default: false },
+  notificationSettings: {
+    emailBookings: { type: Boolean, default: true },
+    emailPromotions: { type: Boolean, default: false },
+    smsReminders: { type: Boolean, default: true },
+    pushNotifications: { type: Boolean, default: true }
+  },
   socialAuth: {
     google: {
       uid: String,

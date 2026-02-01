@@ -5,7 +5,9 @@ import {
   updateUserRole,
   deleteUser,
   getAllSalons,
-  updateSalonStatus
+  updateSalonStatus,
+  updateSalon,
+  deleteSalon
 } from '../controllers/admin';
 import { createSalon } from '../controllers/salons';
 import { protect, authorize } from '../middleware/auth';
@@ -45,13 +47,26 @@ router.use(authorize('admin'));
  * @swagger
  * /api/admin/users:
  *   get:
- *     summary: Get all users (Admin only)
+ *     summary: Get all users with pagination (Admin only)
  *     tags: [19. Admin - User Management]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Number of items per page
  *     responses:
  *       200:
- *         description: List of all users
+ *         description: Paginated list of users
  *         content:
  *           application/json:
  *             schema:
@@ -63,6 +78,14 @@ router.use(authorize('admin'));
  *                   type: array
  *                   items:
  *                     $ref: '#/components/schemas/User'
+ *                 count:
+ *                   type: integer
+ *                 total:
+ *                   type: integer
+ *                 page:
+ *                   type: integer
+ *                 pages:
+ *                   type: integer
  *       403:
  *         description: Admin access required
  */
@@ -136,13 +159,45 @@ router.delete('/users/:userId', deleteUser);
  * @swagger
  * /api/admin/salons:
  *   get:
- *     summary: Get all salons (Admin only)
+ *     summary: Get all salons with pagination (Admin only)
  *     tags: [20. Admin - Salon Management]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Number of items per page
  *     responses:
  *       200:
- *         description: List of all salons
+ *         description: Paginated list of salons
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Salon'
+ *                 count:
+ *                   type: integer
+ *                 total:
+ *                   type: integer
+ *                 page:
+ *                   type: integer
+ *                 pages:
+ *                   type: integer
  */
 router.get('/salons', getAllSalons);
 
@@ -199,6 +254,65 @@ router.get('/salons', getAllSalons);
  *         description: Salon created successfully
  */
 router.post('/salons', upload.array('images', 5), createSalon);
+
+/**
+ * @swagger
+ * /api/admin/salons/{salonId}:
+ *   put:
+ *     summary: Update salon details (Admin only)
+ *     tags: [20. Admin - Salon Management]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: salonId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               address:
+ *                 type: string
+ *               phone:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               workingHours:
+ *                 type: object
+ *     responses:
+ *       200:
+ *         description: Salon updated successfully
+ */
+router.put('/salons/:salonId', updateSalon);
+
+/**
+ * @swagger
+ * /api/admin/salons/{salonId}:
+ *   delete:
+ *     summary: Delete salon (Admin only)
+ *     tags: [20. Admin - Salon Management]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: salonId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Salon deleted successfully
+ */
+router.delete('/salons/:salonId', deleteSalon);
 
 /**
  * @swagger

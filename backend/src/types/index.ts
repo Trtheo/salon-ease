@@ -9,6 +9,12 @@ export interface IUser {
   role: 'customer' | 'salon_owner' | 'admin';
   avatar?: string;
   isVerified: boolean;
+  notificationSettings?: {
+    emailBookings: boolean;
+    emailPromotions: boolean;
+    smsReminders: boolean;
+    pushNotifications: boolean;
+  };
   socialAuth?: {
     google?: {
       uid: string;
